@@ -13,12 +13,16 @@ export interface ArtProps {
   className?: string;
   label?: string;
   open?: boolean; // sofa-cum-bed open state
+  /** Crop in on the furniture (1 = whole room). Default 1.2 keeps pieces large in cards. */
+  zoom?: number;
 }
 
 const FT_KEYS: Record<string, string> = { velvet: "velvet", linen: "linen", boucle: "boucle", leatherette: "leatherette" };
 
 /** Illustrative placeholder artwork. Clearly not a photograph of real stock. */
-export function Art({ art, tone, className, label, open }: ArtProps) {
+export function Art({ art, tone, className, label, open, zoom = 1.2 }: ArtProps) {
+  const vw = VW / zoom, vh = VH / zoom;
+  const vx = (VW - vw) / 2, vy = Math.min(VH - vh, 350 - vh * 0.6);
   const uid = "a" + useId().replace(/[^a-zA-Z0-9]/g, "");
   const t: Theme = {
     uid,
@@ -46,7 +50,7 @@ export function Art({ art, tone, className, label, open }: ArtProps) {
   })();
   return (
     <svg
-      viewBox={`0 0 ${VW} ${VH}`}
+      viewBox={`${vx.toFixed(1)} ${vy.toFixed(1)} ${vw.toFixed(1)} ${vh.toFixed(1)}`}
       className={className}
       role="img"
       aria-label={label || "Illustration of furniture"}

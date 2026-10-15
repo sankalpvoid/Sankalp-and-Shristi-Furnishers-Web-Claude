@@ -35,11 +35,11 @@ export default async function Products({ searchParams }: { searchParams: Promise
               <td className="small">{srcLabel(p.source)}</td>
               <td><span className={`chip ${p.verification === "verified" ? "ok" : "warn"}`}>{p.verification.replace("_", " ")}</span></td>
               <td className="small">{p.price_visibility === "show" && p.price_inr ? `₹${p.price_inr} (public)` : "hidden"}</td>
-              <td className="small">{(JSON.parse(p.art || "{}").kind && "placeholder")}</td>
+              <td className="small">{p.img_count ? `${p.img_count} photo${p.img_count > 1 ? "s" : ""}` : <span className="chip warn">Placeholder</span>}</td>
               <td className="small">{formatDay(p.updated_at.slice(0, 10))}</td>
               <td>
                 <form action={setProductStatus} className="row"><input type="hidden" name="id" value={p.id} />
-                  {p.status === "published" ? <button className="btn sm ghost" name="status" value="unpublished">Unpublish</button> : p.status !== "archived" ? <button className="btn sm" name="status" value="published">Publish</button> : <button className="btn sm ghost" name="status" value="draft">Restore</button>}
+                  {p.status === "published" ? <button className="btn sm ghost" name="status" value="unpublished">Unpublish</button> : p.status === "archived" ? <button className="btn sm ghost" name="status" value="draft">Restore</button> : p.verification === "verified" ? <button className="btn sm" name="status" value="published">Publish</button> : <Link className="btn sm ghost" href={`/admin/products/${p.id}`}>Review first</Link>}
                 </form>
               </td>
             </tr>

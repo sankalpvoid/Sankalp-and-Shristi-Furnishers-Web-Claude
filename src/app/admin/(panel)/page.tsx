@@ -19,8 +19,8 @@ export default async function Dashboard() {
   if (!s.contact.phone) todo.push("Add the showroom phone number");
   if (!s.contact.whatsapp) todo.push("Add the WhatsApp number (WhatsApp buttons stay hidden until set)");
   if (!s.contact.address) todo.push("Add the showroom address, hours and map link");
-  if (!s.flags.legacyClaimVerified) todo.push("Verify the “oldest showroom on Ring Road / first in the market” claim, then tick it in Brand & contact");
-  if (!s.flags.guaranteeVerified) todo.push("Confirm the five-year guarantee wording and terms");
+  if (!s.flags.legacyClaimVerified) todo.push("“Oldest showroom on Ring Road” claim is HIDDEN from the public site. Verify it, then tick it in Brand & contact to show it");
+  if (!s.flags.guaranteeVerified) todo.push("Five-year guarantee is HIDDEN from the public site (home and product pages). Confirm scope and terms, then tick it in Brand & contact");
   if (unverifiedPublished) todo.push(`${unverifiedPublished} published products are unverified sample designs — confirm, edit or unpublish them`);
   return (
     <>

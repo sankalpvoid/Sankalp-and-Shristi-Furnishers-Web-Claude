@@ -22,7 +22,8 @@ const list = (v: string) => JSON.stringify(v.split(/[\n,;]/).map((x) => x.trim()
 // ---------------- auth ----------------
 export async function login(_: ActionState, f: FormData): Promise<ActionState> {
   const ip = clientIp(await headers());
-  if (!rateLimit(`login:${ip}`, 8, 900)) return { error: "Too many attempts. Try again in a few minutes." };
+  // Per-IP limit plus a global limit (X-Forwarded-For can be spoofed when not behind a trusted proxy).
+  if (!rateLimit(`login:${ip}`, 8, 900) || !rateLimit("login:all", 40, 900)) return { error: "Too many attempts. Try again in a few minutes." };
   if (!checkCredentials(s(f, "username"), String(f.get("password") ?? ""))) return { error: "Incorrect username or password." };
   await createSession(s(f, "username"));
   redirect("/admin");
@@ -83,6 +84,10 @@ export async function saveProduct(_: ActionState, f: FormData): Promise<ActionSt
   const price = n(f, "price_inr");
   if (price !== null && (!Number.isFinite(price) || price < 0)) return { error: "Price must be a positive number." };
   if (d.price_visibility === "show" && (!price || d.sales_method !== "fixed_price")) return { error: "To show a price publicly, set the sales method to “Fixed price” and enter the price." };
+  if (d.verification !== "verified") {
+    if (d.price_visibility === "show") return { error: "A price can only be shown publicly once the product is marked Verified." };
+    if (d.availability === "in_stock") return { error: "“In stock” can only be shown once the product is marked Verified. Use “Enquire for availability” until then." };
+  }
   if (d.status === "published" && d.configurator === "" && d.sales_method === "custom_config") return { error: "Custom configuration needs a configurator. Choose one, or change the sales method." };
   let slug = slugify(s(f, "slug") || d.name);
   const clash = conn.prepare("SELECT id FROM products WHERE slug=? AND id<>?").get(slug, id);
@@ -121,7 +126,12 @@ export async function setProductStatus(f: FormData) {
   await requireAdmin();
   const st = s(f, "status");
   if (!["draft", "needs_review", "published", "unpublished", "archived"].includes(st)) return;
-  db().prepare("UPDATE products SET status=?, updated_at=datetime('now') WHERE id=?").run(st, Number(f.get("id")));
+  const id = Number(f.get("id"));
+  if (st === "published") {
+    const cur = db().prepare("SELECT verification FROM products WHERE id=?").get(id) as { verification: string } | undefined;
+    if (!cur || cur.verification !== "verified") return; // unverified products are published only via the full edit form
+  }
+  db().prepare("UPDATE products SET status=?, updated_at=datetime('now') WHERE id=?").run(st, id);
   revalidatePath("/", "layout");
 }
 export async function deleteProduct(f: FormData) {
@@ -171,7 +181,7 @@ export async function saveCategory(f: FormData) {
   const id = Number(f.get("id")) || 0;
   const name = s(f, "name"); if (!name) return;
   const slug = slugify(s(f, "slug") || name);
-  const vals = { name, slug, group_name: s(f, "group_name") || "Other", description: s(f, "description"), art_kind: s(f, "art_kind") || "sofa", image_url: s(f, "image_url"), sort_order: Number(f.get("sort_order")) || 0, visible: f.get("visible") ? 1 : 0 };
+  const vals = { name, slug, group_name: s(f, "group_name") || "Other", description: s(f, "description"), art_kind: s(f, "art_kind") || "sofa", image_url: /^(\/uploads\/|https?:\/\/)\S*$/i.test(s(f, "image_url")) ? s(f, "image_url") : "", sort_order: Number(f.get("sort_order")) || 0, visible: f.get("visible") ? 1 : 0 };
   const conn = db();
   if (id) conn.prepare("UPDATE categories SET name=@name,slug=@slug,group_name=@group_name,description=@description,art_kind=@art_kind,image_url=@image_url,sort_order=@sort_order,visible=@visible WHERE id=@id").run({ ...vals, id });
   else { try { conn.prepare("INSERT INTO categories (name,slug,group_name,description,art_kind,image_url,sort_order,visible,origin) VALUES (@name,@slug,@group_name,@description,@art_kind,@image_url,@sort_order,@visible,'owner')").run(vals); } catch { /* duplicate slug ignored */ } }
@@ -234,6 +244,10 @@ export async function saveSiteSettings(_: ActionState, f: FormData): Promise<Act
   next.hero.image = s(f, "hero.image"); next.hero.imageAlt = s(f, "hero.imageAlt") || cur.hero.imageAlt;
   next.making = next.making.map((m, i) => ({ ...m, title: s(f, `making.${i}.title`) || m.title, caption: s(f, `making.${i}.caption`) || m.caption, image: s(f, `making.${i}.image`) }));
   next.flags = { legacyClaimVerified: !!f.get("flags.legacyClaimVerified"), guaranteeVerified: !!f.get("flags.guaranteeVerified"), contactVerified: !!f.get("flags.contactVerified") };
+  const okUrl = (v: string) => v === "" || v.startsWith("/uploads/") || /^https?:\/\/[^\s]+$/i.test(v);
+  const urlFields: [string, string][] = [["Logo image", next.brand.logoImage], ["Hero image", next.hero.image], ["Map link", next.contact.mapUrl], ["Instagram", next.contact.instagram], ["Facebook", next.contact.facebook], ["YouTube", next.contact.youtube], ...next.making.map((m, i): [string, string] => [`Stage ${i + 1} photo`, m.image])];
+  const bad = urlFields.find(([, v]) => !okUrl(v));
+  if (bad) return { error: `${bad[0]}: use a full https:// address or an /uploads/ path.` };
   if (next.contact.email && !/^\S+@\S+\.\S+$/.test(next.contact.email)) return { error: "That email address doesn't look right." };
   if (next.contact.whatsapp && next.contact.whatsapp.replace(/\D/g, "").length < 10) return { error: "WhatsApp number should include the country code, e.g. 91XXXXXXXXXX." };
   next.contact.whatsapp = next.contact.whatsapp.replace(/\D/g, "");

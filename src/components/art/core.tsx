@@ -92,7 +92,7 @@ export function Paint({ t }: { t: Theme }) {
         <stop offset="1" stopColor="#000" stopOpacity="0.12" />
       </linearGradient>
       <pattern id={`${u}-weave`} width="6" height="6" patternUnits="userSpaceOnUse">
-        <path d="M0 3H6M3 0V6" stroke="#000" strokeOpacity="0.07" strokeWidth="1" />
+        <path d="M0 3H6M3 0V6" stroke="#000" strokeOpacity="0.035" strokeWidth="0.8" />
       </pattern>
       <pattern id={`${u}-bouc`} width="8" height="8" patternUnits="userSpaceOnUse">
         <circle cx="2" cy="2" r="1.3" fill="#fff" fillOpacity="0.22" />

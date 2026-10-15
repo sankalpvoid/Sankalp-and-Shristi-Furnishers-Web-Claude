@@ -15,6 +15,7 @@ export function parseCsv(text: string): string[][] {
     else if (c === "\n" || c === "\r") { if (c === "\r" && t[i + 1] === "\n") i++; row.push(cur); cur = ""; if (row.some((x) => x.trim() !== "")) rows.push(row); row = []; }
     else cur += c;
   }
+  if (q) throw new Error("This file is not valid CSV: a quoted value is never closed. Check for a stray \" character and re-export.");
   row.push(cur); if (row.some((x) => x.trim() !== "")) rows.push(row);
   return rows;
 }
@@ -46,6 +47,8 @@ const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9_ ]/g, " ").replace
 export interface ParsedFile { headers: string[]; mapped: Record<string, number>; records: Record<string, string>[]; unmappedHeaders: string[]; headerRow: number }
 
 export function parseInventory(text: string): ParsedFile | null {
+  if (!text.trim()) throw new Error("The file is empty.");
+  if (/[\u0000-\u0008\u000E-\u001F]/.test(text.slice(0, 4000))) throw new Error("This doesn't look like a text CSV file (it contains binary data). Export or save as CSV (UTF-8) and try again.");
   const rows = parseCsv(text);
   let headerRow = -1;
   for (let i = 0; i < Math.min(rows.length, 20); i++) {
@@ -91,7 +94,8 @@ export function importInventory(conn: Database.Database, filename: string, text:
   const src = conn.prepare("INSERT INTO import_sources (filename,kind,rows_total) VALUES (?,?,?)").run(filename, "csv", parsed.records.length);
   const importId = Number(src.lastInsertRowid);
   const findBySlug = conn.prepare("SELECT id FROM products WHERE slug=?");
-  const findByRef = conn.prepare("SELECT id FROM products WHERE source_ref=? AND source_ref<>''");
+  // Compare on a normalised key so "Teak Bed, King" and "Teak Bed King" count as the same item.
+  const seen = new Set((conn.prepare("SELECT source_ref FROM products WHERE source_ref<>''").all() as { source_ref: string }[]).map((r) => slugify(r.source_ref)));
   const ins = conn.prepare(`INSERT INTO products (slug,sku,name,category_id,subcategory,short_description,description,material,finish,dimensions,sizes,colours,upholstery,availability,quantity,price_inr,price_visibility,sales_method,customisable,status,source,verification,source_ref,import_id,internal_notes,art)
     VALUES (@slug,@sku,@name,@category_id,@subcategory,@short,@description,@material,@finish,@dimensions,@sizes,@colours,@upholstery,'enquire',@quantity,@price,'hidden',@sales,@custom,'needs_review','tally_import','needs_review',@ref,@import_id,@notes,@art)`);
 
@@ -101,19 +105,35 @@ export function importInventory(conn: Database.Database, filename: string, text:
       const name = r.name?.trim();
       if (!name || /^(grand )?total$/i.test(name)) { skipped++; if (name) lines.push(`Row ${rowNo}: skipped "${name}" (total row)`); else lines.push(`Row ${rowNo}: skipped (no item name)`); return; }
       const ref = r.source_ref || name;
-      if (findByRef.get(ref)) { skipped++; lines.push(`Row ${rowNo}: skipped "${name}" (already imported)`); return; }
-      let slug = slugify(name), n = 2;
-      while (findBySlug.get(slug)) slug = `${slugify(name)}-${n++}`;
+      if (seen.has(slugify(ref))) { skipped++; lines.push(`Row ${rowNo}: skipped "${name}" (duplicate of an item already imported)`); return; }
+      const base = slugify(name.slice(0, 120));
+      seen.add(slugify(ref));
+      let slug = base, n = 2;
+      while (findBySlug.get(slug)) slug = `${base}-${n++}`;
       const cat = r.category ? matchCat(r.category) : undefined;
       const notes: string[] = ["Imported from inventory file. Review everything before publishing."];
       if (r.category && !cat) notes.push(`Category "${r.category}" did not match a website category — choose one.`);
       if (r.rate) notes.push(`Inventory rate/value "${r.rate}" kept here for reference only (not shown publicly; unverified meaning).`);
       if (r.unit) notes.push(`Unit: ${r.unit}`);
-      const qty = r.quantity ? parseFloat(r.quantity.replace(/[^0-9.\-]/g, "")) : NaN;
-      const price = r.price_inr ? Math.round(parseFloat(r.price_inr.replace(/[^0-9.]/g, ""))) : NaN;
-      if (r.price_inr && Number.isFinite(price)) notes.push(`Price column value ${price} imported but NOT shown publicly — set price visibility yourself.`);
+      const clean = (v: string) => v.replace(/[\u0000-\u001F]/g, " ").trim();
+      const warn: string[] = [];
+      let qty = NaN;
+      if (r.quantity) {
+        qty = parseFloat(r.quantity.replace(/,/g, "").match(/-?\d+(\.\d+)?/)?.[0] ?? "");
+        if (!Number.isFinite(qty) || qty < 0) { warn.push(`quantity "${r.quantity}" is not a valid number — left blank`); qty = NaN; }
+      }
+      let price = NaN;
+      if (r.price_inr) {
+        price = Math.round(parseFloat(r.price_inr.replace(/[₹,\s]/g, "")));
+        if (!Number.isFinite(price) || price < 0) { warn.push(`price "${r.price_inr}" is not a valid amount — ignored`); price = NaN; }
+        else notes.push(`Price column value ${price} imported but NOT shown publicly — set price visibility yourself.`);
+      }
+      if (name.length > 120) warn.push("name was longer than 120 characters and was shortened");
+      if (!cat && r.category) warn.push(`category "${r.category}" did not match — product left uncategorised`);
+      if (!r.sku) warn.push("no SKU/item code — left blank (none invented)");
+      if (warn.length) lines.push(`Row ${rowNo} "${name.slice(0, 40)}": ${warn.join("; ")}`);
       ins.run({
-        slug, sku: r.sku || "", name, category_id: cat?.id ?? null, subcategory: r.subcategory || "",
+        slug, sku: clean(r.sku || "").slice(0, 60), name: clean(name).slice(0, 120), category_id: cat?.id ?? null, subcategory: r.subcategory || "",
         short: r.short_description || "", description: r.description || "", material: r.material || "", finish: r.finish || "", dimensions: r.dimensions || "",
         sizes: splitList(r.sizes || ""), colours: splitList(r.colours || ""), upholstery: splitList(r.upholstery || ""),
         quantity: Number.isFinite(qty) ? Math.round(qty) : null, price: Number.isFinite(price) ? price : null,

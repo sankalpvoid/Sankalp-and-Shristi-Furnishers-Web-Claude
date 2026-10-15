@@ -83,7 +83,8 @@ export interface PublicProduct {
   art: ArtParams;
   images: { url: string; alt: string }[];
   featured: boolean;
-  isSample: boolean; // unverified seed/draft data — shown with a label
+  isSample: boolean; // not verified by the owner — shown with a label
+  sampleKind: "sample" | "unconfirmed";
 }
 
 export interface ArtParams {

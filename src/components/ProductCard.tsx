@@ -31,7 +31,8 @@ export function ProductCard({ p }: { p: PublicProduct }) {
   return (
     <Link href={`/product/${p.slug}`} className="pcard">
       <ProductMedia p={p} />
-      <h3>{p.name}</h3>
+      {p.isSample && <span className="chip line" style={{ marginTop: 12 }}>{p.sampleKind === "sample" ? "Sample design" : "Details being confirmed"}</span>}
+      <h3 style={p.isSample ? { marginTop: 8 } : undefined}>{p.name}</h3>
       <p>{p.shortDescription}</p>
       <div className="meta">
         <span className={p.price ? "price" : ""}>{priceLine(p)}</span>

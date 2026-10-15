@@ -49,7 +49,9 @@ export default async function ProductPage({ params }: P) {
             {p.price ? formatInr(p.price) : p.customisable ? "Made to your design — price on quotation" : "Price on request"}
           </p>
           {p.isSample && (
-            <div className="notice warn">This is a sample design shown with an illustration. Sizes, materials and availability are confirmed by the showroom team before you decide.</div>
+            <div className="notice warn">{p.sampleKind === "sample"
+              ? "This is a sample design shown with an illustration. Sizes, materials and availability are confirmed by the showroom team before you decide."
+              : "The details for this product are still being confirmed. Please check sizes, materials and availability with the showroom team."}</div>
           )}
           <p>{p.description}</p>
           <dl className="spec">

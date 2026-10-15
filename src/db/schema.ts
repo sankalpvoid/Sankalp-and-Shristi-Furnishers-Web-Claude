@@ -5,6 +5,14 @@
  */
 export const SCHEMA_VERSION = 1;
 
+/**
+ * Forward-only migrations applied on start-up, in order, after the base schema.
+ * Add new entries here (never edit old ones) when the schema changes, e.g.
+ *   { version: 2, sql: "ALTER TABLE products ADD COLUMN foo TEXT NOT NULL DEFAULT ''" }
+ * The database file is never recreated, so existing data is preserved.
+ */
+export const MIGRATIONS: { version: number; sql: string }[] = [];
+
 export const SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, value TEXT NOT NULL);
 

@@ -1,0 +1,14 @@
+# Single-instance deployment. Put a TLS-terminating reverse proxy (Caddy/nginx) in front.
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env.production        # ADMIN_PASSWORD (12+ chars), SESSION_SECRET — never commit this file
+    environment:
+      DATA_DIR: /data
+    volumes:
+      - ssfi-data:/data               # database + uploads + backups live here
+    ports:
+      - "127.0.0.1:3000:3000"         # only the reverse proxy should reach it
+volumes:
+  ssfi-data:

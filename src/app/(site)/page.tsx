@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Art } from "@/components/art";
 import { ProductCard } from "@/components/ProductCard";
 import { SecHead } from "@/components/Section";
-import { getSettings } from "@/lib/settings";
+import { getSettings, publicClaims } from "@/lib/settings";
 import { listCategories, listPublishedProducts, productCountByCategory } from "@/lib/repo";
 import { PLACEHOLDER } from "@/lib/site-defaults";
 
@@ -10,6 +10,7 @@ const FEATURED_CATS = ["beds", "sofas", "dining-tables", "sofa-cum-beds", "dress
 
 export default function Home() {
   const s = getSettings();
+  const claims = publicClaims(s);
   const cats = listCategories();
   const counts = productCountByCategory();
   const picked = FEATURED_CATS.map((slug) => cats.find((c) => c.slug === slug)).filter(Boolean) as typeof cats;
@@ -34,7 +35,7 @@ export default function Home() {
             <div className="hero-meta">
               <div><b>Own workshop</b>Made, not just sold</div>
               <div><b>Solid teak</b>In our solid-teak range</div>
-              <div><b>{s.story.guaranteeHeadline}</b>Ask for the terms</div>
+              {claims.guarantee && <div><b>{claims.guarantee.headline}</b>Ask for the terms</div>}
             </div>
           </div>
           <div className="hero-art">
@@ -43,7 +44,7 @@ export default function Home() {
               <img src={s.hero.image} alt={s.hero.imageAlt} fetchPriority="high" />
             ) : (
               <>
-                <Art art={{ kind: "sofa", layout: "five", wood: "#6e4a2f", fabric: "#8b967f", fabric_type: "linen", legs: "tapered", cushions: "loose" }} tone="ivory" label={s.hero.imageAlt} />
+                <Art art={{ kind: "sofa", layout: "five", wood: "#6e4a2f", fabric: "#8b967f", fabric_type: "linen", legs: "tapered", cushions: "loose" }} tone="ivory" zoom={1.3} label={s.hero.imageAlt} />
                 <span className="hero-note">Illustration · showroom photography coming</span>
               </>
             )}
@@ -63,7 +64,7 @@ export default function Home() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={c.image_url} alt="" loading="lazy" />
                   ) : (
-                    <Art art={{ kind: c.art_kind, wood: "#a8692f", fabric: "#b3aa9b", tone: c.slug === "mattresses" ? "stone" : "ivory" }} label="" />
+                    <Art art={{ kind: c.art_kind, wood: "#a8692f", fabric: "#b3aa9b", tone: c.slug === "mattresses" ? "stone" : "ivory" }} zoom={1.3} label="" />
                   )}
                 </div>
                 <div className="tile-label"><h3>{c.name}</h3><span>{counts[c.id] ? `${counts[c.id]} ${counts[c.id] === 1 ? "design" : "designs"}` : "Ask in showroom"}</span></div>
@@ -144,8 +145,8 @@ export default function Home() {
           <div>
             <span className="eyebrow">The showroom</span>
             <h2>See it, sit on it, talk it through</h2>
-            <p className="callout">{s.story.legacyClaim}</p>
-            <p style={{ marginTop: 24 }}>{s.story.showroomIntro}</p>
+            {claims.legacy && <p className="callout">{claims.legacy}</p>}
+            <p style={{ marginTop: claims.legacy ? 24 : 0 }}>{s.story.showroomIntro}</p>
             <div className="row" style={{ marginTop: 24 }}>
               <Link className="btn" href="/showroom#plan">Plan your visit</Link>
               <Link className="btn ghost" href="/showroom">Address &amp; hours</Link>
@@ -163,10 +164,10 @@ export default function Home() {
       <section className="section">
         <div className="wrap">
           <SecHead eyebrow="What you can count on" title="Honest materials, made properly" />
-          <div className="trust-grid">
+          <div className="trust-grid" style={claims.guarantee ? undefined : { gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))", maxWidth: 900 }}>
             <div><span className="num">01</span><h3>Solid teak</h3><p>{s.story.materialsStatement}</p></div>
             <div><span className="num">02</span><h3>Our own workshop</h3><p>We make custom furniture ourselves, so changes to size, finish and fabric are conversations, not special orders to someone else.</p></div>
-            <div><span className="num">03</span><h3>{s.story.guaranteeHeadline}</h3><p>{s.story.guaranteeNote}</p></div>
+            {claims.guarantee && <div><span className="num">03</span><h3>{claims.guarantee.headline}</h3><p>{claims.guarantee.note}</p></div>}
           </div>
           <p style={{ marginTop: 48, borderTop: "1px solid var(--line)", paddingTop: 24 }}>
             <strong>Sleepwell mattresses.</strong> {s.story.sleepwellText} <Link className="linkarrow" href="/shop/mattresses">Mattresses</Link>

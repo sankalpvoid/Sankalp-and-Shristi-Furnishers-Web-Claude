@@ -21,6 +21,19 @@ export function saveSettings(s: SiteSettings) {
   db().prepare("INSERT INTO settings (key,value,updated_at) VALUES ('site',?,datetime('now')) ON CONFLICT(key) DO UPDATE SET value=excluded.value, updated_at=excluded.updated_at").run(JSON.stringify(s));
 }
 
+/**
+ * Owner claims are DRAFT content until the owner ticks "verified" in admin.
+ * Public pages must only read claims through this helper.
+ */
+export function publicClaims(s: SiteSettings) {
+  return {
+    legacy: s.flags.legacyClaimVerified && s.story.legacyClaim.trim() ? s.story.legacyClaim.trim() : null,
+    guarantee: s.flags.guaranteeVerified && s.story.guaranteeHeadline.trim()
+      ? { headline: s.story.guaranteeHeadline.trim(), note: s.story.guaranteeNote.trim() }
+      : null,
+  };
+}
+
 /** Build a wa.me link, or null if no WhatsApp number has been configured. */
 export function whatsappUrl(s: SiteSettings, message: string): string | null {
   const num = s.contact.whatsapp.replace(/\D/g, "");

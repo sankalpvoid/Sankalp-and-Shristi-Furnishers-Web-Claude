@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Art } from "@/components/art";
 import { EnquiryForm } from "@/components/EnquiryForm";
 import { ContactActions } from "@/components/ContactActions";
-import { getSettings } from "@/lib/settings";
+import { getSettings, publicClaims } from "@/lib/settings";
 import { getConfiguration, getPublishedProduct, listCategories } from "@/lib/repo";
 import { PLACEHOLDER } from "@/lib/site-defaults";
 
@@ -12,6 +12,7 @@ export const metadata: Metadata = { title: "Visit the showroom" };
 export default async function Showroom({ searchParams }: { searchParams: Promise<{ product?: string; config?: string }> }) {
   const sp = await searchParams;
   const s = getSettings();
+  const claims = publicClaims(s);
   const c = s.contact;
   const cats = listCategories().map((x) => ({ slug: x.slug, name: x.name }));
   const product = sp.product ? getPublishedProduct(sp.product) : undefined;
@@ -27,7 +28,7 @@ export default async function Showroom({ searchParams }: { searchParams: Promise
         <div className="split" style={{ paddingBottom: 80 }}>
           <div className="media" style={{ aspectRatio: "4/3.2" }}><Art art={{ kind: "sofa", layout: "seven", wood: "#6e4a2f", fabric: "#b3aa9b", fabric_type: "boucle" }} tone="sand" label="Illustration" /><span className="ill-tag">Illustration · showroom photography coming</span></div>
           <div>
-            <p className="callout">{s.story.legacyClaim}</p>
+            {claims.legacy && <p className="callout">{claims.legacy}</p>}
             <dl className="kv" style={{ margin: "32px 0", gridTemplateColumns: "7em 1fr", rowGap: 18 }}>
               <dt>Address</dt><dd className={c.address ? "hours" : "placeholder on-light"}>{c.address || PLACEHOLDER.address}</dd>
               <dt>Hours</dt><dd className={c.hours ? "hours" : "placeholder on-light"}>{c.hours || PLACEHOLDER.hours}</dd>

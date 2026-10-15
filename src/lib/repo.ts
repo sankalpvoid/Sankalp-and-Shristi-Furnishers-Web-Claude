@@ -4,6 +4,7 @@ import type {
   OptionValue, ProductRow, PublicProduct, Selections,
 } from "./types";
 import { parseJson } from "./util";
+import { getSettings } from "./settings";
 
 // ---------- categories ----------
 export function listCategories(opts: { includeHidden?: boolean } = {}): Category[] {
@@ -20,8 +21,8 @@ export function productCountByCategory(): Record<number, number> {
 }
 
 // ---------- products ----------
-const PRODUCT_SELECT = `SELECT p.*, c.slug AS cat_slug, c.name AS cat_name FROM products p LEFT JOIN categories c ON c.id=p.category_id`;
-type Joined = ProductRow & { cat_slug: string | null; cat_name: string | null };
+const PRODUCT_SELECT = `SELECT p.*, c.slug AS cat_slug, c.name AS cat_name, (SELECT COUNT(*) FROM product_images i WHERE i.product_id=p.id) AS img_count FROM products p LEFT JOIN categories c ON c.id=p.category_id`;
+type Joined = ProductRow & { cat_slug: string | null; cat_name: string | null; img_count: number };
 
 function imagesFor(id: number) {
   return db().prepare("SELECT url, alt FROM product_images WHERE product_id=? ORDER BY sort_order, id").all(id) as { url: string; alt: string }[];
@@ -29,6 +30,8 @@ function imagesFor(id: number) {
 
 /** Whitelist mapper: the ONLY path from DB row to a browser-visible product. */
 export function toPublic(r: Joined): PublicProduct {
+  const verified = r.verification === "verified";
+  const guaranteeOk = getSettings().flags.guaranteeVerified;
   const art = parseJson<ArtParams>(r.art, { kind: "sofa" });
   return {
     id: r.id, slug: r.slug, name: r.name,
@@ -36,11 +39,13 @@ export function toPublic(r: Joined): PublicProduct {
     subcategory: r.subcategory, shortDescription: r.short_description, description: r.description,
     material: r.material, finish: r.finish, dimensions: r.dimensions,
     sizes: parseJson<string[]>(r.sizes, []), colours: parseJson<string[]>(r.colours, []), upholstery: parseJson<string[]>(r.upholstery, []),
-    availability: r.availability,
-    price: r.price_visibility === "show" && r.sales_method === "fixed_price" && r.price_inr ? r.price_inr : null,
+    // Unverified records can never present themselves as confirmed stock or carry a public price.
+    availability: verified || r.availability === "made_to_order" ? r.availability : "enquire",
+    price: verified && r.price_visibility === "show" && r.sales_method === "fixed_price" && r.price_inr ? r.price_inr : null,
     salesMethod: r.sales_method, customisable: !!r.customisable, configurator: r.configurator,
-    warranty: r.warranty_text, art, images: imagesFor(r.id), featured: !!r.featured,
-    isSample: r.verification !== "verified",
+    warranty: guaranteeOk ? r.warranty_text : "", art, images: imagesFor(r.id), featured: !!r.featured,
+    isSample: !verified,
+    sampleKind: r.source === "proposed_seed" ? "sample" : "unconfirmed",
   };
 }
 

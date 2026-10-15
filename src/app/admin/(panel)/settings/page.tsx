@@ -37,11 +37,11 @@ export default async function Settings() {
           <T n="contact.instagram" label="Instagram URL" v={s.contact.instagram} /><T n="contact.facebook" label="Facebook URL" v={s.contact.facebook} /><T n="contact.youtube" label="YouTube URL" v={s.contact.youtube} />
         </div></div>
         <div className="panel full"><h2>Story &amp; trust wording</h2><div className="grid-form">
-          <A n="story.legacyClaim" label="Showroom history claim (owner-provided)" v={s.story.legacyClaim} hint="Shown prominently on the homepage and showroom page. Verify before launch." />
+          <A n="story.legacyClaim" label="Showroom history claim — DRAFT (owner-provided)" v={s.story.legacyClaim} hint={s.flags.legacyClaimVerified ? "Verified: currently shown on the homepage and showroom page." : "Not verified: currently HIDDEN from the public site. Tick the verification box below to show it."} />
           <A n="story.showroomIntro" label="Showroom introduction" v={s.story.showroomIntro} />
           <A n="story.workshopStory" label="Workshop story" v={s.story.workshopStory} />
           <A n="story.materialsStatement" label="Materials statement" v={s.story.materialsStatement} hint="Only claim what is true of the products described." />
-          <T n="story.guaranteeHeadline" label="Guarantee headline" v={s.story.guaranteeHeadline} /><A n="story.guaranteeNote" label="Guarantee note" v={s.story.guaranteeNote} rows={2} hint="Add the real scope and exclusions here once confirmed." />
+          <T n="story.guaranteeHeadline" label="Guarantee headline — DRAFT" v={s.story.guaranteeHeadline} /><A n="story.guaranteeNote" label="Guarantee note" v={s.story.guaranteeNote} rows={2} hint={s.flags.guaranteeVerified ? "Verified: shown on the homepage, and product-level guarantee wording is shown on product pages." : "Not verified: the guarantee is HIDDEN everywhere on the public site, including product pages. Add the real scope and exclusions, then tick the box below."} />
           <A n="story.sleepwellText" label="Sleepwell partner text" v={s.story.sleepwellText} rows={2} />
         </div></div>
         <div className="panel full"><h2>The Art of Making stages</h2><p className="small muted">Add a real workshop photograph address to replace the illustration for a stage.</p>
@@ -53,8 +53,8 @@ export default async function Settings() {
           ))}
         </div>
         <div className="panel full"><h2>Verification (internal)</h2>
-          <label className="small" style={{ display: "block" }}><input type="checkbox" name="flags.legacyClaimVerified" defaultChecked={s.flags.legacyClaimVerified} /> I have verified the showroom history claim</label>
-          <label className="small" style={{ display: "block" }}><input type="checkbox" name="flags.guaranteeVerified" defaultChecked={s.flags.guaranteeVerified} /> I have confirmed the five-year guarantee wording</label>
+          <label className="small" style={{ display: "block" }}><input type="checkbox" name="flags.legacyClaimVerified" defaultChecked={s.flags.legacyClaimVerified} /> I have verified the showroom history claim — show it publicly</label>
+          <label className="small" style={{ display: "block" }}><input type="checkbox" name="flags.guaranteeVerified" defaultChecked={s.flags.guaranteeVerified} /> I have confirmed the guarantee scope and terms — show it publicly</label>
           <label className="small" style={{ display: "block" }}><input type="checkbox" name="flags.contactVerified" defaultChecked={s.flags.contactVerified} /> Contact details are final</label>
         </div>
       </ActionForm>

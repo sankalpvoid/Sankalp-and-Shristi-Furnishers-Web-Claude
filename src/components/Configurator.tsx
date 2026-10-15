@@ -76,7 +76,7 @@ export function Configurator({ conf, label, groups, rules, limits, preset, produ
       <div className="cfg-stage">
         <div className="stage">
           <Art art={art} open={conf === "sofa_bed" ? open : undefined} tone="ivory" label={`Illustrative preview of your ${label.toLowerCase()} design`} />
-          <span className="stage-badge">Illustrative preview · not 3D</span>
+          <span className="stage-badge">Illustration · not 3D</span>
           {conf === "sofa_bed" && (
             <div className="stage-ctl">
               <button aria-pressed={!open} onClick={() => setOpen(false)}>Sofa</button>
@@ -129,7 +129,7 @@ export function Configurator({ conf, label, groups, rules, limits, preset, produ
             <>
               <h3 style={{ marginTop: 0 }}>Save your design</h3>
               <p className="small">No account needed. You&apos;ll get a reference number and a link you can share or bring to the showroom.</p>
-              <div className="field"><label htmlFor="notes">Notes for the team <span className="muted">(optional)</span></label><textarea id="notes" className="textarea" value={notes} maxLength={500} onChange={(e) => setNotes(e.target.value)} placeholder="Room size, timing, anything you'd like us to know" /></div>
+              <div className="field"><label htmlFor="notes">Notes for the team <span className="muted">(optional · seen by our team only, never on shared links)</span></label><textarea id="notes" className="textarea" value={notes} maxLength={500} onChange={(e) => setNotes(e.target.value)} placeholder="Room size, timing, anything you'd like us to know" /></div>
               {err && <div className="notice bad" role="alert" style={{ marginBottom: 0 }}>{err}</div>}
               <button className="btn block" style={{ marginTop: 16 }} onClick={save} disabled={saving}>{saving ? "Saving…" : "Save design & get reference"}</button>
             </>

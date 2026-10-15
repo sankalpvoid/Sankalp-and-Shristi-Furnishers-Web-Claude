@@ -3,14 +3,18 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { SESSION_COOKIE } from "./constants";
 
-const DAY = 60 * 60 * 24;
+const SESSION_SECONDS = 60 * 60 * 8; // 8 hours; there is no server-side revocation (see SECURITY.md)
 
 function secret(): string | null {
   const s = process.env.SESSION_SECRET;
   return s && s.length >= 16 ? s : null;
 }
 export function adminConfigured(): boolean {
-  return !!(process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD !== "change-me-before-use" && secret());
+  const pw = process.env.ADMIN_PASSWORD;
+  if (!pw || pw === "change-me-before-use" || !secret()) return false;
+  // In production a short password is refused outright.
+  if (process.env.NODE_ENV === "production" && pw.length < 12) return false;
+  return true;
 }
 const sign = (payload: string, key: string) => crypto.createHmac("sha256", key).update(payload).digest("base64url");
 
@@ -31,10 +35,10 @@ export function checkCredentials(user: string, pass: string): boolean {
 export async function createSession(user: string) {
   const key = secret();
   if (!key) throw new Error("SESSION_SECRET not configured");
-  const exp = Math.floor(Date.now() / 1000) + DAY * 7;
+  const exp = Math.floor(Date.now() / 1000) + SESSION_SECONDS;
   const payload = Buffer.from(JSON.stringify({ u: user, exp })).toString("base64url");
   (await cookies()).set(SESSION_COOKIE, `${payload}.${sign(payload, key)}`, {
-    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: DAY * 7,
+    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: SESSION_SECONDS,
   });
 }
 export async function destroySession() { (await cookies()).delete(SESSION_COOKIE); }

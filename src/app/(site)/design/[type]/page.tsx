@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Configurator } from "@/components/Configurator";
 import { CONFIGURATORS, CONFIGURATOR_URL_SLUG } from "@/lib/constants";
 import { getConfiguration, getOptionGroups, getProductLimits, getPublishedProduct, getRules } from "@/lib/repo";
-import { presetFromProduct } from "@/lib/preview";
+import { presetFromProduct, START_PRESET } from "@/lib/preview";
 import { getSettings } from "@/lib/settings";
 import { parseJson } from "@/lib/util";
 import type { Selections } from "@/lib/types";
@@ -25,7 +25,7 @@ export default async function DesignPage({ params, searchParams }: P) {
   const groups = getOptionGroups(conf);
   const rules = getRules(conf);
   const limits = validProduct ? getProductLimits(validProduct.id) : {};
-  let preset: Selections = validProduct ? presetFromProduct(conf, validProduct.art) : {};
+  let preset: Selections = { ...START_PRESET[conf], ...(validProduct ? presetFromProduct(conf, validProduct.art) : {}) };
   let startNote: string | undefined;
   if (ref) {
     const saved = getConfiguration(ref);

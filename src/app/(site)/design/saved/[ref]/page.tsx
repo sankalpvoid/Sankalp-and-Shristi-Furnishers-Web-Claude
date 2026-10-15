@@ -29,7 +29,6 @@ export default async function SavedDesign({ params }: P) {
         <div className="stage"><Art art={art} label="Illustrative preview of this design" /><span className="stage-badge">Illustrative preview · not 3D</span></div>
         <div>
           <dl className="kv" style={{ marginBottom: 24 }}>{summary.map((l) => <Fragment key={l.label}><dt>{l.label}</dt><dd>{l.value}</dd></Fragment>)}</dl>
-          {c.notes && <div className="note"><small>Notes</small>{c.notes}</div>}
           <div className="notice">This page shows the design only — no contact details are stored with it. Final size, availability and price are confirmed by the showroom team.</div>
           <div className="intent-grid" style={{ margin: "20px 0" }}>
             {INTENTS.filter((i) => i.value !== "exploring").map((i) => (

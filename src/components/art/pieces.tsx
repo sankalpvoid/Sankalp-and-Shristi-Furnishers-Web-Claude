@@ -166,7 +166,7 @@ export function Sofa({ t, layout = "three", legs = "tapered", cushions = "fixed"
   const gap = layout === "lshape" ? 0 : 22;
   const widths = parts.map((p) => moduleWidth(p.seats, p.la ?? true, p.ra ?? true));
   const total = widths.reduce((a, b) => a + b, 0) + gap * (parts.length - 1);
-  const scale = Math.min(1, 700 / total);
+  const scale = Math.min(1.3, 600 / total);
   let x = 400 - (total * scale) / 2;
   const base = FLOOR + 14;
   return (
@@ -287,12 +287,12 @@ export function Dining({ t, shape = "rectangular", capacity = 6, chairs = "wood"
   const kind = chairKind ?? (chairs === "upholstered" ? "upholstered" : "wood");
   const showChairs = chairs !== "none";
   const per = Math.max(1, Math.floor(capacity / 2));
-  const topY = 380; // vertical centre of table top
+  const topY = 338; // vertical centre of table top
   let top: React.ReactElement, legs: React.ReactElement, backXs: number[], frontXs: number[];
-  let backY: number, frontY: number, backS = 0.88, frontS = 1.08;
+  let backY: number, frontY: number, backS = 0.95, frontS = 1.18;
   if (shape === "round" || shape === "oval") {
-    const rx = shape === "round" ? (capacity >= 6 ? 150 : 120) : capacity >= 8 ? 250 : capacity >= 6 ? 210 : 170;
-    const ry = shape === "round" ? rx * 0.3 : rx * 0.27;
+    const rx = shape === "round" ? (capacity >= 6 ? 190 : 150) : capacity >= 8 ? 290 : capacity >= 6 ? 245 : 200;
+    const ry = shape === "round" ? rx * 0.3 : rx * 0.25;
     top = (
       <g>
         <ellipse cx={cx} cy={topY + 12} rx={rx} ry={ry} fill="#000" fillOpacity="0.25" />
@@ -315,12 +315,12 @@ export function Dining({ t, shape = "rectangular", capacity = 6, chairs = "wood"
     );
     const spread = (n: number) => Array.from({ length: n }).map((_, i) => cx + (n === 1 ? 0 : (-0.62 + (1.24 * i) / (n - 1)) * rx));
     backXs = spread(per); frontXs = spread(per);
-    backY = topY - ry * 0.55; frontY = topY + ry + 34;
+    backY = topY - ry * 0.5; frontY = topY + ry + 40;
   } else {
-    const fw = shape === "square" ? 250 : capacity >= 8 ? 560 : capacity >= 6 ? 450 : 330;
+    const fw = shape === "square" ? 300 : capacity >= 8 ? 640 : capacity >= 6 ? 520 : 400;
     const bw = fw * 0.86;
-    const yb = 346, yf = shape === "square" ? 420 : 410;
-    const th = 14;
+    const yb = 300, yf = shape === "square" ? 392 : 372;
+    const th = 16;
     top = (
       <g>
         <path d={`M${cx - bw / 2} ${yb} H${cx + bw / 2} L${cx + fw / 2} ${yf} H${cx - fw / 2} Z`} fill={`url(#${t.uid}-wood)`} />
@@ -331,15 +331,15 @@ export function Dining({ t, shape = "rectangular", capacity = 6, chairs = "wood"
     );
     legs = (
       <g>
-        <WoodRect t={t} x={cx - bw / 2 + 12} y={yb + 2} w={13} h={FLOOR - yb - 40} r={2} vertical />
-        <WoodRect t={t} x={cx + bw / 2 - 25} y={yb + 2} w={13} h={FLOOR - yb - 40} r={2} vertical />
+        <WoodRect t={t} x={cx - bw / 2 + 12} y={yb + 2} w={13} h={FLOOR - yb - 34} r={2} vertical />
+        <WoodRect t={t} x={cx + bw / 2 - 25} y={yb + 2} w={13} h={FLOOR - yb - 34} r={2} vertical />
         <WoodRect t={t} x={cx - fw / 2 + 6} y={yf + th} w={16} h={FLOOR - yf - th + 6} r={2} vertical />
         <WoodRect t={t} x={cx + fw / 2 - 22} y={yf + th} w={16} h={FLOOR - yf - th + 6} r={2} vertical />
       </g>
     );
-    const spreadW = (n: number, w: number) => Array.from({ length: n }).map((_, i) => cx + (n === 1 ? 0 : (-0.5 + (i + 0.5) / n - 0.5 / n * 0 ) * 0) + ((i + 0.5) / n - 0.5) * w * 0.92);
+    const spreadW = (n: number, w: number) => Array.from({ length: n }).map((_, i) => cx + ((i + 0.5) / n - 0.5) * w * 0.9);
     backXs = spreadW(per, bw); frontXs = spreadW(per, fw);
-    backY = yb + 4; frontY = yf + th + 26;
+    backY = yb + 6; frontY = yf + th + 34;
   }
   return (
     <g>

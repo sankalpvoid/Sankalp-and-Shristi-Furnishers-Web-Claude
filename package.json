@@ -11,6 +11,8 @@
     "test": "vitest run",
     "db:seed": "tsx scripts/seed.ts",
     "db:reset": "tsx scripts/seed.ts --reset",
+    "backup": "tsx scripts/backup.ts",
+    "e2e": "echo 'See README: run e2e/*.cjs against a running dev server'",
     "import:tally": "tsx scripts/import-tally.ts"
   },
   "dependencies": {

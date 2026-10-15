@@ -18,4 +18,25 @@ describe("inventory import", () => {
     expect(p.status).toBe("needs_review"); expect(p.source).toBe("tally_import"); expect(p.price_visibility).toBe("hidden"); expect(p.price_inr).toBeNull(); expect(p.quantity).toBe(3);
     expect(importInventory(c, "t.csv", tally).imported).toBe(0); // idempotent
   });
+  it("rejects unterminated quotes, empty and binary files", () => {
+    const c = fresh();
+    expect(() => importInventory(c, "x.csv", 'Name,Qty\n"Broken,1\n')).toThrow(/never closed/);
+    expect(() => importInventory(c, "x.csv", "   \n")).toThrow(/empty/);
+    expect(() => importInventory(c, "x.csv", "PK\u0003\u0004\u0000\u0000binary")).toThrow();
+    expect(() => importInventory(c, "x.csv", "foo,bar\n1,2\n")).toThrow(/header row/);
+    expect((c.prepare("SELECT COUNT(*) n FROM products WHERE source='tally_import'").get() as { n: number }).n).toBe(0);
+  });
+  it("never invents values and reports invalid ones", () => {
+    const c = fresh();
+    const csv = "Name,Qty,Price,Item Code,Category\nGood Bed,abc,xyz,,Beds\nGood Bed,2,100,,Beds\nNeg Sofa,-4,,S1,Sofas\nOdd Thing,,,,Spaceships\n";
+    const r = importInventory(c, "x.csv", csv);
+    expect(r.imported).toBe(3); expect(r.skipped).toBe(1);
+    const rows = c.prepare("SELECT * FROM products WHERE source='tally_import' ORDER BY id").all() as Record<string, unknown>[];
+    for (const p of rows) { expect(p.status).toBe("needs_review"); expect(p.price_visibility).toBe("hidden"); expect(p.verification).toBe("needs_review"); expect(p.availability).toBe("enquire"); }
+    const bed = rows.find((p) => p.name === "Good Bed")!;
+    expect(bed.quantity).toBeNull(); expect(bed.price_inr).toBeNull(); expect(bed.sku).toBe("");
+    expect(rows.find((p) => p.name === "Neg Sofa")!.quantity).toBeNull();
+    expect(rows.find((p) => p.name === "Odd Thing")!.category_id).toBeNull();
+    expect(r.lines.join("\n")).toMatch(/not a valid number/);
+  });
 });

@@ -142,7 +142,8 @@ export interface SeedProduct {
   configurator?: ConfiguratorType; art: Record<string, string | number | boolean>; featured?: boolean;
 }
 
-const NOTE = " This is a sample design used to show how the catalogue works. Availability, sizes and materials are confirmed by the showroom team.";
+// Sample status is shown by the site's own "sample design" notice, so descriptions stay plain.
+const NOTE = "";
 const WOOD_NOTE = "Solid teak frame (owner-stated for our solid-teak furniture; confirm for this design)";
 
 export const SEED_PRODUCTS: SeedProduct[] = [

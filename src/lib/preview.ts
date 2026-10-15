@@ -18,6 +18,14 @@ export function previewArt(conf: ConfiguratorType, groups: OptionGroup[], sel: S
   }
 }
 
+/** Sensible starting points (used only if still available after rules/limits). */
+export const START_PRESET: Record<ConfiguratorType, Selections> = {
+  bed: { size: "queen" },
+  sofa: { layout: "three" },
+  sofa_bed: { layout: "three" },
+  dining: { shape: "rectangular", capacity: "6" },
+};
+
 /** Seed configurator defaults from a product's illustration params where keys match. */
 export function presetFromProduct(conf: ConfiguratorType, art: ArtParams): Selections {
   const out: Selections = {};
