@@ -4,7 +4,7 @@ import path from "node:path";
 import { SCHEMA_SQL } from "./schema";
 import { seedDatabase } from "./seed";
 
-export const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(process.cwd(), "data"));
+export const DATA_DIR = path.resolve(process.env.DATA_DIR || path.join(/*turbopackIgnore: true*/ process.cwd(), "data"));
 
 type DB = Database.Database;
 const g = globalThis as unknown as { __ssfiDb?: DB };
