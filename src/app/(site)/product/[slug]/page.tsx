@@ -10,6 +10,7 @@ import { getPublishedProduct, listPublishedProducts } from "@/lib/repo";
 import { getSettings } from "@/lib/settings";
 import { availabilityLabel, configuratorSlug } from "@/lib/constants";
 import { formatInr } from "@/lib/util";
+import { productRender } from "@/lib/renders";
 
 type P = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: P): Promise<Metadata> {
@@ -40,17 +41,17 @@ export default async function ProductPage({ params }: P) {
         <div className="crumbs"><Link href="/">Home</Link> / <Link href="/shop">Furniture</Link> / <Link href={`/shop/${p.categorySlug}`}>{p.categoryName}</Link> / {p.name}</div>
       </div>
       <div className="pdp">
-        <Gallery p={p} />
+        <Gallery p={p} render={productRender(p.slug)} />
         <div className="pdp-info">
           <span className="eyebrow">{p.categoryName}</span>
           <h1 style={{ fontSize: "clamp(2.2rem,4vw,3.4rem)" }}>{p.name}</h1>
           <p className="lede">{p.shortDescription}</p>
-          <p style={{ fontSize: "1.2rem", fontFamily: "var(--font-serif)" }}>
+          <p className="pdp-price">
             {p.price ? formatInr(p.price) : p.customisable ? "Made to your design — price on quotation" : "Price on request"}
           </p>
           {p.isSample && (
             <div className="notice warn">{p.sampleKind === "sample"
-              ? "This is a sample design shown with an illustration. Sizes, materials and availability are confirmed by the showroom team before you decide."
+              ? "This is a sample design shown with a placeholder image. Sizes, materials and availability are confirmed by the showroom team before you decide."
               : "The details for this product are still being confirmed. Please check sizes, materials and availability with the showroom team."}</div>
           )}
           <p>{p.description}</p>

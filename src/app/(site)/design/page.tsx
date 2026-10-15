@@ -1,11 +1,14 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Art } from "@/components/art";
+import { RenderPhoto } from "@/components/Photo";
+import { productRender } from "@/lib/renders";
 import { CONFIGURATORS, configuratorSlug } from "@/lib/constants";
 import type { ArtParams, ConfiguratorType } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Design Your Own" };
 
+const REP: Record<string, string> = { bed: "slatted-headboard-bed", sofa: "three-seater-sofa", sofa_bed: "sofa-cum-bed", dining: "round-dining-table" };
 const ART: Record<ConfiguratorType, ArtParams> = {
   bed: { kind: "bed", headboard: "arched", wood: "#a8692f", size: "queen" },
   sofa: { kind: "sofa", layout: "three", fabric: "#8b967f", wood: "#6e4a2f", fabric_type: "linen" },
@@ -18,13 +21,13 @@ export default function DesignHub() {
     <div className="wrap">
       <div className="page-head">
         <span className="eyebrow">Design your own</span>
-        <h1>Make it yours</h1>
-        <p className="lede">Choose the size, finish and fabric, see an illustrative preview, and save your design. Our team confirms what can be made and quotes the price.</p>
+        <div className="head-split"><h1>Make it yours</h1>
+        <p className="lede">Choose the size, finish and fabric, see an illustrative preview, and save your design. Our team confirms what can be made and quotes the price.</p></div>
       </div>
-      <div className="p-grid" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", paddingBottom: 60 }}>
+      <div className="p-grid" style={{ paddingBottom: 60 }}>
         {(Object.keys(CONFIGURATORS) as ConfiguratorType[]).map((t) => (
           <Link key={t} href={`/design/${configuratorSlug(t)}`} className="pcard">
-            <div className="media" style={{ aspectRatio: "4/3.2" }}><Art art={ART[t]} label="" /></div>
+            <div className="media">{(() => { const r = productRender(REP[t]); return r ? <RenderPhoto r={r} sizes="(min-width:900px) 33vw, 100vw" tag={false} /> : <Art art={ART[t]} label="" />; })()}</div>
             <h3>{CONFIGURATORS[t].label}</h3>
             <p>{CONFIGURATORS[t].blurb}</p>
           </Link>

@@ -128,6 +128,7 @@ export function Configurator({ conf, label, groups, rules, limits, preset, produ
           {!saved ? (
             <>
               <h3 style={{ marginTop: 0 }}>Save your design</h3>
+              <div className="cfg-sum-inline" aria-label="Your choices"><ul>{summary.map((l) => <li key={l.label}><span>{l.label}</span>{l.value}</li>)}</ul></div>
               <p className="small">No account needed. You&apos;ll get a reference number and a link you can share or bring to the showroom.</p>
               <div className="field"><label htmlFor="notes">Notes for the team <span className="muted">(optional · seen by our team only, never on shared links)</span></label><textarea id="notes" className="textarea" value={notes} maxLength={500} onChange={(e) => setNotes(e.target.value)} placeholder="Room size, timing, anything you'd like us to know" /></div>
               {err && <div className="notice bad" role="alert" style={{ marginBottom: 0 }}>{err}</div>}

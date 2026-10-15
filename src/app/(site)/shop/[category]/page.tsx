@@ -20,15 +20,20 @@ export default async function CategoryPage({ params }: P) {
     <div className="wrap">
       <div className="page-head">
         <div className="crumbs"><Link href="/">Home</Link> / <Link href="/shop">Furniture</Link> / {cat.name}</div>
-        <h1>{cat.name}</h1>
-        {cat.description && <p className="lede">{cat.description}</p>}
+        <div className="head-split">
+          <h1>{cat.name}</h1>
+          {cat.description && <p className="lede">{cat.description}</p>}
+        </div>
       </div>
       <nav className="filter-bar" aria-label="Categories">
         <Link className="pill" href="/shop">All</Link>
         {cats.map((c) => <Link key={c.slug} className="pill" href={`/shop/${c.slug}`} aria-current={c.slug === category ? "true" : undefined}>{c.name}</Link>)}
       </nav>
       {products.length ? (
-        <div className="p-grid four" style={{ paddingBottom: 100 }}>{products.map((p) => <ProductCard key={p.id} p={p} />)}</div>
+        <>
+          <div className="list-tools"><span>{products.length} {products.length === 1 ? "design" : "designs"}</span><Link className="linkarrow" href={`/contact?about=${encodeURIComponent(cat.name)}`}>Ask about {cat.name.toLowerCase()}</Link></div>
+          <div className="p-grid" style={{ paddingBottom: 120 }}>{products.map((p, i) => <ProductCard key={p.id} p={p} priority={i < 3} />)}</div>
+        </>
       ) : (
         <div className="empty" style={{ marginBottom: 100 }}>
           <h3>Ask us about {cat.name.toLowerCase()}</h3>

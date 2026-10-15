@@ -2,8 +2,10 @@
 import { useState } from "react";
 import { Art } from "./art";
 import type { PublicProduct } from "@/lib/types";
+import { RenderPhoto } from "./Photo";
+import type { RenderImg } from "@/lib/renders";
 
-export function Gallery({ p }: { p: PublicProduct }) {
+export function Gallery({ p, render }: { p: PublicProduct; render?: RenderImg | null }) {
   const [i, setI] = useState(0);
   const img = p.images[i];
   return (
@@ -12,6 +14,8 @@ export function Gallery({ p }: { p: PublicProduct }) {
         {img ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={img.url} alt={img.alt || p.name} />
+        ) : render ? (
+          <RenderPhoto r={render} alt={`Studio render of ${p.name} (placeholder image)`} sizes="(min-width:960px) 60vw, 100vw" priority />
         ) : (
           <>
             <Art art={p.art} label={`Illustration of ${p.name}`} />

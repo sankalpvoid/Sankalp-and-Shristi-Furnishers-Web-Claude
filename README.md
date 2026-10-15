@@ -38,6 +38,10 @@ node e2e/claims.cjs          # owner claims hidden until verified
 
 See also [SECURITY.md](SECURITY.md) (controls and shared-login limitations) and [DEPLOYMENT.md](DEPLOYMENT.md) (persistent-disk requirement, Docker, backups, restore).
 
+## Look and feel
+
+Contemporary editorial design: ivory paper, charcoal, one brass accent, large type, squared quiet buttons, big 5:4 product images. Temporary imagery is **studio renders generated locally** (`tools/render`, three.js) and always labelled "Studio render · placeholder" — they are not photographs of our stock, showroom or workshop. Real photos uploaded in admin always override them. See [docs/design/README.md](docs/design/README.md) for the design critique, before/after screenshots, how to swap in real photography, and how to regenerate renders.
+
 ## What's here
 
 - **Storefront**: homepage, categories, product pages, shortlist (browser-only), showroom + "Plan your visit", contact, The Art of Making (scroll story; static fallback for no-JS / reduced motion), privacy note.
@@ -60,7 +64,7 @@ See also [SECURITY.md](SECURITY.md) (controls and shared-login limitations) and 
 - **The five-year guarantee is HIDDEN everywhere publicly** (home page and product pages, including any per-product guarantee text). Draft wording is preserved in admin and shows only after the owner ticks the guarantee confirmation. No terms are invented.
 - Option lists (sizes, finishes, fabrics, storage, mechanisms) are **suggested defaults** — mark what you really offer. Size labels are indicative only. The default "unavailable combination" rules for dining tables are suggestions.
 - "Solid teak" wording is limited to our solid-teak range; seed products say "owner-stated, confirm for this design".
-- All imagery is illustrative artwork, labelled as such. Replace via admin uploads (hero, logo, workshop stages, product photos) — no code changes. Temporary logo "SSFI" is replaced by setting a logo image.
+- All imagery is temporary: studio renders and illustration artwork, each labelled as such. Replace via admin uploads (hero, logo, workshop stages, product photos) — no code changes. Temporary logo "SSFI" is replaced by setting a logo image.
 - The privacy note is draft wording, not legal advice.
 
 ## Database & production notes

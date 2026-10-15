@@ -12,6 +12,7 @@
     "db:seed": "tsx scripts/seed.ts",
     "db:reset": "tsx scripts/seed.ts --reset",
     "backup": "tsx scripts/backup.ts",
+    "render:assets": "node tools/render/render.cjs",
     "e2e": "echo 'See README: run e2e/*.cjs against a running dev server'",
     "import:tally": "tsx scripts/import-tally.ts"
   },
@@ -29,8 +30,10 @@
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/three": "^0.186.0",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.1",
+    "three": "^0.186.1",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "vitest": "^5.0.5"

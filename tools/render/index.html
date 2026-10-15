@@ -1,0 +1,15 @@
+<!doctype html><meta charset="utf-8"><body style="margin:0;background:#222">
+<script type="importmap">{"imports":{"three":"/three/build/three.module.js","three/addons/":"/three/examples/jsm/"}}</script>
+<script type="module">
+import { renderScene } from "./engine.js";
+import { JOBS, listJobs } from "./jobs.js";
+import { seedKit } from "./kit.js";
+window.__jobs = listJobs();
+window.renderJob = async (name, q) => {
+  const j = JOBS[name]; if (!j) throw new Error("unknown job " + name);
+  seedKit(7);
+  const f = q || {};
+  return renderScene({ ...j, width: Math.round(j.width * (f.scale || 1)), height: Math.round(j.height * (f.scale || 1)), ...f.samples });
+};
+window.__ready = true;
+</script>
