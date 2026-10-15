@@ -259,3 +259,4 @@ h3 { font-size: clamp(1.3rem, 1.9vw, 1.65rem); letter-spacing: -0.02em; }
 
 .hero-photo .ill-tag, .hero-photo .hero-note { max-width: calc(100% - var(--gutter) * 2); right: auto; }
 .dark .eyebrow::before, .making .eyebrow::before, .mk-hero .eyebrow::before { background: var(--brass-soft); }
+.band .ill-tag { left: auto; right: 12px; }

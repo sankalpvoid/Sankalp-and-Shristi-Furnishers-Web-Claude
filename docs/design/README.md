@@ -42,3 +42,12 @@ node tools/render/render.cjs --only hero,products/panel-bed
 node tools/render/render.cjs --scale=0.5      # quick low-res check
 ```
 Jobs live in `tools/render/jobs.js`, furniture and materials in `tools/render/kit.js`. Output goes to `public/renders/` as WebP (full + `-sm` 800px for cards). A full run takes roughly an hour on a 4-core CPU without a GPU.
+
+## Before / after screenshots
+
+Same pages, same viewports (desktop 1440×900, mobile 390×844): `docs/design/before/*.png` and `docs/design/after/*.png`
+(`home`, `shop`, `category-beds`, `product`, `cfg-bed`, `cfg-sofa`, `cfg-sofa-cum-bed`, `cfg-dining`, `showroom`, `making`, `design-hub`, each with a `desktop-` and `mobile-` prefix).
+The "after" set was captured after scrolling the page so lazy-loaded images are present.
+
+## Verified in this phase
+Type-check, lint, 22 unit tests and the production build pass; `e2e/configurators.cjs`, `e2e/claims.cjs` and `e2e/admin.cjs` all pass against the production server with a fresh database.

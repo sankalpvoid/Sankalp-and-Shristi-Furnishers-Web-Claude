@@ -9,7 +9,7 @@ export default function ErrorPage({ reset }: { error: Error; reset: () => void }
         <p className="lede">Please try again. If it keeps happening, call or message the showroom and we&apos;ll help directly.</p>
         <div className="row" style={{ marginTop: 28 }}>
           <button className="btn" onClick={() => reset()}>Try again</button>
-          <a className="btn ghost" href="/">Home</a>
+          <button className="btn ghost" onClick={() => window.location.assign("/")}>Home</button>
         </div>
       </div>
     </main>
