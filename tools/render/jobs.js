@@ -65,17 +65,17 @@ P("upholstered-headboard-bed", "sand", () => K.bed({ size: "queen", headboard: "
 P("storage-bed", "warm", () => K.bed({ size: "queen", headboard: "panel", storage: "drawers", wood: W.honey, bedding: "#e8e1d3", throwHex: F.navy }), bedFr, { props: (s) => { add(s, K.rug(2.6, 1.8, "#a89f8f", 0.4, 0)); } });
 P("divan-cum-bed", "stone", () => K.bed({ size: "double", headboard: "panel", low: true, wood: W.honey, fabric: F.stone, ft: "linen", bedding: "#e6dfd0", throwHex: F.sage }), { ...bedFr, W: 2.7 }, { props: (s) => { add(s, K.rug(2.4, 1.7, "#cfc8bb", 0.4, 0)); } });
 P("dressing-table-with-mirror", "warm", () => K.dressing({ wood: W.honey }), { W: 1.5, H: 1.7, t: [0, 0.8, 0], yaw: 0.32, pitch: 0.05, wallZ: -0.5, m: 1.1 }, { props: (s) => { add(s, K.rug(1.8, 1.2, "#a89f8f", 0.5, 0)); const st = K.stool({ wood: W.honey }); st.position.set(0.1, 0, 0.75); add(s, st); } });
-P("bedroom-accent-chair", "sand", () => K.armchair({ fabric: F.sage, ft: "velvet", wood: W.walnut, legs: "tapered" }), { W: 1.3, H: 1.0, t: [0, 0.4, 0], yaw: 0.5, pitch: 0.08, wallZ: -0.8, m: 1.25 }, { props: (s) => { add(s, K.rug(1.8, 1.4, "#a89f8f", 0.2, 0), K.floorLamp(-0.9, -0.6, 1.4)); } });
+P("bedroom-accent-chair", "sand", () => K.armchair({ fabric: F.sage, ft: "velvet", wood: W.walnut, legs: "tapered" }), { W: 2.0, H: 1.6, t: [0, 0.5, 0], yaw: 0.5, pitch: 0.08, wallZ: -0.9, m: 1.1 }, { props: (s) => { add(s, K.rug(1.8, 1.4, "#a89f8f", 0.2, 0), K.floorLamp(-0.9, -0.6, 1.4)); } });
 P("three-seater-sofa", "stone", () => K.sofa({ layout: "three", fabric: F.stone, ft: "linen", wood: W.walnut, legs: "tapered", cushions: "fixed" }), { W: 3.0, H: 1.2, t: [0, 0.42, 0], yaw: 0.38, pitch: 0.08, wallZ: -0.8, m: 1.1 }, { props: (s) => { add(s, K.rug(2.8, 1.8, "#a89f8f", 0.3, 0)); } });
-P("five-seater-sofa-set", "warm", () => K.sofa({ layout: "five", fabric: F.sage, ft: "linen", wood: W.espresso, legs: "block", cushions: "fixed" }), { W: 5.0, H: 1.6, t: [0, 0.45, 0], yaw: 0.28, pitch: 0.08, wallZ: -0.8, m: 1.0 }, { props: (s) => { add(s, K.rug(3.8, 2.2, "#a89f8f", 0.4, 0)); } });
-P("seven-seater-sofa-set", "stone", () => K.sofa({ layout: "seven", fabric: F.navy, ft: "velvet", wood: W.walnut, legs: "tapered", cushions: "loose" }), { W: 6.3, H: 1.8, t: [0, 0.45, 0], yaw: 0.25, pitch: 0.08, wallZ: -0.8, m: 1.0 }, { props: (s) => { add(s, K.rug(4.2, 2.4, "#cfc8bb", 0.4, 0)); } });
+P("five-seater-sofa-set", "warm", () => K.sofa({ layout: "five", fabric: F.sage, ft: "linen", wood: W.espresso, legs: "block", cushions: "fixed" }), { W: 4.1, H: 1.5, t: [0, 0.45, 0], yaw: 0.28, pitch: 0.08, wallZ: -0.8, m: 1.0 }, { props: (s) => { add(s, K.rug(3.8, 2.2, "#a89f8f", 0.4, 0)); } });
+P("seven-seater-sofa-set", "stone", () => K.sofa({ layout: "seven", fabric: F.navy, ft: "velvet", wood: W.walnut, legs: "tapered", cushions: "loose" }), { W: 5.1, H: 1.7, t: [0, 0.45, 0], yaw: 0.25, pitch: 0.08, wallZ: -0.8, m: 1.0 }, { props: (s) => { add(s, K.rug(4.2, 2.4, "#cfc8bb", 0.4, 0)); } });
 P("sofa-cum-bed", "warm", () => K.sofaBedOpen({ fabric: F.charcoal, ft: "leatherette", wood: W.walnut, sleeper: "double" }), { W: 2.9, H: 1.3, t: [0, 0.4, 0], yaw: 0.55, pitch: 0.2, wallZ: -1.3, m: 1.1 }, { props: (s) => { add(s, K.rug(2.6, 2.2, "#d9d0c0", 0.1, 0)); } });
 P("lounge-couch", "warm", () => K.sofa({ layout: "lshape", fabric: F.terracotta, ft: "velvet", wood: W.espresso, legs: "block", cushions: "loose" }), { W: 3.4, H: 1.3, t: [0.1, 0.42, 0.3], yaw: -0.45, pitch: 0.12, wallZ: -0.85, m: 1.05 }, { props: (s) => { add(s, K.rug(3.0, 2.4, "#a89f8f", 0.5, 0.2)); } });
 P("teak-centre-table", "warm", () => K.centreTable({ wood: W.honey }), { W: 1.5, H: 0.9, t: [0, 0.25, 0], yaw: 0.3, pitch: 0.28, wallZ: -1.6, m: 1.15 }, { props: (s) => { add(s, K.rug(2.4, 1.8, "#a89f8f", 0, 0)); } });
-P("wooden-stool", "sand", () => K.stool({ wood: W.natural }), { W: 0.9, H: 0.9, t: [0, 0.25, 0], yaw: 0.35, pitch: 0.12, wallZ: -0.9, m: 1.35 });
+P("wooden-stool", "sand", () => K.stool({ wood: W.natural }), { W: 1.5, H: 1.1, t: [0, 0.27, 0], yaw: 0.4, pitch: 0.2, wallZ: -0.9, m: 1.1 });
 P("six-seater-dining-table", "warm", () => K.dining({ shape: "rectangular", capacity: 6, chairs: "wood", wood: W.honey }), { W: 3.2, H: 1.4, t: [0, 0.5, 0], yaw: 0.45, pitch: 0.2, wallZ: -2.0, m: 1.05 }, { props: (s) => { add(s, K.rug(3.4, 2.4, "#cfc8bb", 0, 0)); const v = K.vase(0.26, "#e9e2d4"); v.position.set(0, 0.75, 0); add(s, v); } });
 P("round-dining-table", "stone", () => K.dining({ shape: "round", capacity: 4, chairs: "upholstered", wood: W.natural, fabric: F.sage, ft: "linen" }), { W: 2.2, H: 1.3, t: [0, 0.45, 0], yaw: 0.4, pitch: 0.2, wallZ: -1.7, m: 1.1 }, { props: (s) => { add(s, K.rug(2.6, 2.6, "#a89f8f", 0, 0)); const v = K.vase(0.26, "#e9e2d4"); v.position.set(0, 0.75, 0); add(s, v); } });
-P("wooden-dining-chair", "sand", () => K.diningChair({ wood: W.honey, kind: "wood", s: 1.2 }), { W: 0.9, H: 1.1, t: [0, 0.45, 0], yaw: 0.5, pitch: 0.08, wallZ: -0.8, m: 1.3 });
+P("wooden-dining-chair", "sand", () => K.diningChair({ wood: W.honey, kind: "wood", s: 1.2 }), { W: 1.5, H: 1.6, t: [0, 0.5, 0], yaw: 0.5, pitch: 0.08, wallZ: -0.9, m: 1.1 });
 P("sleepwell-mattresses", "stone", () => K.mattress(), { W: 2.4, H: 1.0, t: [0, 0.3, 0], yaw: 0.6, pitch: 0.28, wallZ: -1.8, m: 1.1 });
 
 /* ---------- dark "design your own" tiles (4:3) ---------- */
@@ -93,7 +93,7 @@ M("wood", "dark", 1600, 1000, (w, h) => {
   logs.forEach(([x, y, z, r, len]) => { const l = K.log(len, r); l.position.set(x - 0.0, y, z + (Math.random() * 0.0)); l.rotation.y = 0; item.add(l); });
   const pl = G(); for (let i = 0; i < 6; i++) { const p = K.plank(1.8, 0.28, 0.04, "#c9a26d"); p.position.set(0, 0.03 + i * 0.075, 0); pl.add(p); for (const bx of [-0.7, 0.7]) { const b = box(0.04, 0.035, 0.28, plain("#8b6b45", 0.9)); b.position.set(bx, 0.012 + i * 0.075 + 0.0, 0); } }
   pl.position.set(1.75, 0, 0.4); pl.rotation.y = -0.15; item.add(pl);
-  return { item, wallZ: -1.6, patch: V(0.6, 1.15, -1.6), ...frame(w, h, 3.6, 1.7, [0.45, 0.5, -0.6], 0.42, 0.08, 30, 1.0), pos: [0, 0, -0.6] };
+  return { item, wallZ: -1.6, patch: V(0.6, 1.15, -1.6), ...frame(w, h, 3.4, 1.8, [0.4, 0.6, -0.6], 0.35, 0.1, 30, 1.0), pos: [0, 0, -0.6], rot: -1.2 };
 });
 M("cut", "dark", 1600, 1000, (w, h) => {
   const item = G(); const bench = K.workbench(); item.add(bench);
