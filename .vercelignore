@@ -1,0 +1,5 @@
+docs
+e2e
+tests
+data
+.env*

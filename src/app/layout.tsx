@@ -10,6 +10,7 @@ export function generateMetadata(): Metadata {
   return {
     title: { default: `${s.brand.name} — ${s.brand.tagline}`, template: `%s · ${s.brand.name}` },
     description: s.brand.description,
+    robots: process.env.PREVIEW_MODE === "1" ? { index: false, follow: false } : undefined,
     metadataBase: process.env.NEXT_PUBLIC_SITE_URL ? new URL(process.env.NEXT_PUBLIC_SITE_URL) : undefined,
   };
 }

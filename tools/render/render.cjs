@@ -37,4 +37,5 @@ const outDir = path.resolve(__dirname, "..", "..", "public", "renders");
     console.log(`${name} → ${path.relative(process.cwd(), dest)} (${((Date.now() - t0) / 1000).toFixed(1)}s)`);
   }
   await b.close(); srv.close();
+  require("./manifest.cjs");
 })();

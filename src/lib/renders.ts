@@ -1,35 +1,17 @@
-import fs from "node:fs";
-import path from "node:path";
+import manifest from "./renders-manifest.json";
 
 /**
  * Temporary studio renders (public/renders/**). These are generated placeholders from
  * tools/render — NOT photographs of real stock, showroom or workshop. Anything uploaded in
  * admin (product photos, hero/making images in settings) always takes precedence.
  */
-const dir = path.join(/*turbopackIgnore: true*/ process.cwd(), "public", "renders");
-let cache: Set<string> | null = null;
-function files(): Set<string> {
-  if (cache && process.env.NODE_ENV === "production") return cache;
-  const out = new Set<string>();
-  const walk = (d: string, rel = "") => {
-    let entries: fs.Dirent[] = [];
-    try { entries = fs.readdirSync(d, { withFileTypes: true }); } catch { return; }
-    for (const e of entries) {
-      if (e.name.startsWith("_")) continue; // drafts
-      if (e.isDirectory()) walk(path.join(d, e.name), rel + e.name + "/");
-      else if (e.name.endsWith(".webp")) out.add(rel + e.name);
-    }
-  };
-  walk(dir);
-  cache = out;
-  return out;
-}
+const FILES: Set<string> = new Set(manifest as string[]);
 
 export interface RenderImg { src: string; srcSet: string; width: number; height: number }
 const SIZES: Record<string, [number, number]> = { products: [1500, 1200], design: [1200, 900], making: [1600, 1000], hero: [1800, 1500], showroom: [1800, 1125] };
 
 function make(name: string): RenderImg | null {
-  const f = files();
+  const f = FILES;
   if (!f.has(name + ".webp")) return null;
   const [width, height] = SIZES[name.split("/")[0]] ?? [1500, 1200];
   const sm = f.has(name + "-sm.webp") ? `/renders/${name}-sm.webp 800w, ` : "";
