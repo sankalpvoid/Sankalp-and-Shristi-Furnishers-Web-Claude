@@ -9,3 +9,4 @@ data/uploads
 next-env.d.ts
 .env.production
 data/backups
+

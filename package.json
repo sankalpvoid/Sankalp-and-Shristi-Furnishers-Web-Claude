@@ -14,7 +14,8 @@
     "backup": "tsx scripts/backup.ts",
     "render:assets": "node tools/render/render.cjs",
     "e2e": "echo 'See README: run e2e/*.cjs against a running dev server'",
-    "import:tally": "tsx scripts/import-tally.ts"
+    "import:tally": "tsx scripts/import-tally.ts",
+    "prepare:making": "node scripts/prepare-making-video.mjs"
   },
   "dependencies": {
     "@fontsource-variable/fraunces": "^5.3.0",

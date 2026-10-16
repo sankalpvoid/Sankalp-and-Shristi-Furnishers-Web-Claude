@@ -42,6 +42,17 @@ See also [SECURITY.md](SECURITY.md) (controls and shared-login limitations) and 
 
 Contemporary editorial design: ivory paper, charcoal, one brass accent, large type, squared quiet buttons, big 5:4 product images. Temporary imagery is **studio renders generated locally** (`tools/render`, three.js) and always labelled "Studio render · placeholder" — they are not photographs of our stock, showroom or workshop. Real photos uploaded in admin always override them. See [docs/design/README.md](docs/design/README.md) for the design critique, before/after screenshots, how to swap in real photography, and how to regenerate renders.
 
+## Homepage manufacturing sequence (scroll-scrubbed video)
+
+At the top of the homepage a pinned section plays a furniture-making video as you scroll (down = forward, up = reverse), then releases into the rest of the page. It is **off until real clips are added**. The footage is AI-generated placeholder material and is labelled as such on screen.
+
+1. Put the clips in `assets/manufacturing-videos/`, list their order/trims/crossfades in `sequence.json`.
+2. `npm run prepare:making` (needs `ffmpeg`) builds `public/making/sequence.mp4`, `sequence-sm.mp4` (phones), `poster.jpg` and `final.jpg`.
+3. Set `enabled: true` in `src/config/making-sequence.ts` (captions, scroll length and smoothing are there too), commit `public/making/*`, push.
+
+Local test without touching config: `MAKING_SEQUENCE=1 npm run dev`. Browser checks: `MAKING_SEQUENCE=1 … node e2e/making-sequence.cjs`.
+Reduced-motion, data-saver and failed-video visitors get a static panel with the finished frame instead of a pinned track. See `assets/manufacturing-videos/README.md`.
+
 ## What's here
 
 - **Storefront**: homepage, categories, product pages, shortlist (browser-only), showroom + "Plan your visit", contact, The Art of Making (scroll story; static fallback for no-JS / reduced motion), privacy note.

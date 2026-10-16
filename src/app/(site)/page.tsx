@@ -7,6 +7,8 @@ import { getSettings, publicClaims } from "@/lib/settings";
 import { listCategories, listPublishedProducts, productCountByCategory } from "@/lib/repo";
 import { kindRender, siteRender } from "@/lib/renders";
 import { PLACEHOLDER } from "@/lib/site-defaults";
+import { ManufacturingScroll } from "@/components/ManufacturingScroll";
+import { makingSequence, sequenceEnabled } from "@/config/making-sequence";
 import type { Category } from "@/lib/types";
 
 const FEATURED_CATS = ["beds", "sofas", "dining-tables", "sofa-cum-beds", "dressing-tables", "mattresses"];
@@ -43,8 +45,11 @@ export default function Home() {
 
   return (
     <>
+      {/* Manufacturing sequence: pinned, scroll-scrubbed video (see src/config/making-sequence.ts) */}
+      {sequenceEnabled() && <ManufacturingScroll cfg={makingSequence} />}
+
       {/* HERO */}
-      <section className="hero">
+      <section className="hero" id="after-sequence">
         <div className="hero-split">
           <div className="hero-copy">
             <span className="eyebrow">{s.brand.name}</span>

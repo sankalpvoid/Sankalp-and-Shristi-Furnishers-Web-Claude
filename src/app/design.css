@@ -263,3 +263,34 @@ h3 { font-size: clamp(1.3rem, 1.9vw, 1.65rem); letter-spacing: -0.02em; }
 
 .preview-bar { background: var(--ink); color: #f4efe5; font: 500 12px/1.45 var(--font-sans); padding: 9px var(--gutter); display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; justify-content: center; text-align: center; }
 .preview-bar b { letter-spacing: 0.14em; text-transform: uppercase; font-size: 11px; color: var(--brass-soft); }
+
+/* ---------- manufacturing sequence (pinned, scroll-scrubbed) ---------- */
+.mk-seq { position: relative; background: var(--night); color: #f4efe5; height: calc(var(--track-vh) * 1svh); }
+.mk-seq.is-static { height: auto; }
+.mk-seq-pin { position: sticky; top: var(--header-h); height: calc(100svh - var(--header-h)); min-height: 420px; overflow: hidden; }
+.mk-seq.is-static .mk-seq-pin { position: relative; height: min(78svh, 760px); }
+.mk-seq-media { position: absolute; inset: 0; background: var(--night); }
+.mk-seq-still, .mk-seq-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.mk-seq-video { opacity: 0; transition: opacity .4s ease; }
+.mk-seq.is-ready .mk-seq-video { opacity: 1; }
+.mk-seq-cap { position: absolute; left: max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))); bottom: clamp(28px, 6vh, 64px); max-width: 540px; background: #1c1b19e8; padding: clamp(22px, 3vw, 40px); opacity: 0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; pointer-events: none; }
+.mk-seq-cap[data-on="true"] { opacity: 1; transform: none; pointer-events: auto; }
+.mk-seq-cap h2 { font-size: clamp(2.2rem, 4.6vw, 4rem); margin: 0; }
+.mk-seq-cap .eyebrow { margin-bottom: 14px; }
+.mk-seq-label { position: absolute; right: 12px; bottom: 12px; font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; background: #000b; color: #ddd; padding: 4px 9px; max-width: calc(100% - 24px); }
+.mk-seq-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #ffffff22; }
+.mk-seq-progress > div { height: 100%; background: var(--brass-soft); transform: scaleX(0); transform-origin: left; }
+.mk-seq-hint { position: absolute; right: var(--gutter); top: 18px; font-size: 0.64rem; letter-spacing: 0.2em; text-transform: uppercase; color: #f4efe5cc; background: #00000066; padding: 4px 9px; }
+.mk-seq-skip { position: absolute; left: 12px; top: 12px; z-index: 3; background: var(--paper); color: var(--ink); padding: 10px 14px; font-size: 0.8rem; transform: translateY(-200%); }
+.mk-seq-skip:focus { transform: none; }
+@media (max-width: 768px) {
+  .mk-seq { height: calc(var(--track-vh-m) * 1svh); }
+  .mk-seq.is-static { height: auto; }
+  /* leave room for the fixed bottom action bar (about 72px) */
+  .mk-seq-cap { left: 12px; right: 12px; bottom: 88px; max-width: none; padding: 20px 20px 22px; }
+  .mk-seq-cap h2 { font-size: clamp(1.9rem, 8vw, 2.6rem); }
+  .mk-seq-hint { display: none; }
+  .mk-seq-label { top: 10px; bottom: auto; left: 12px; right: auto; }
+  .mk-seq-progress { bottom: 76px; }
+}
+@media (prefers-reduced-motion: reduce) { .mk-seq-cap, .mk-seq-video { transition: none; } }

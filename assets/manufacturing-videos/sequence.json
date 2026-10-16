@@ -1,0 +1,12 @@
+{
+  "_help": "Order, trims and crossfades for the homepage manufacturing sequence. Put the downloaded clips next to this file, list them here in the order they should play, then run: npm run prepare:making",
+  "width": 1280,
+  "height": 720,
+  "fps": 24,
+  "clips": [
+    { "file": "01-clip.mp4", "start": 0, "end": null, "crossfade": 0.6 },
+    { "file": "02-clip.mp4", "start": 0, "end": null, "crossfade": 0.6 },
+    { "file": "03-clip.mp4", "start": 0, "end": null, "crossfade": 0.6 },
+    { "file": "04-clip.mp4", "start": 0, "end": null, "crossfade": 0 }
+  ]
+}
