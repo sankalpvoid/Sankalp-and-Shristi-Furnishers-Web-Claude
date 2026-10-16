@@ -1,0 +1,39 @@
+{
+  "duration": 34.917,
+  "width": 1280,
+  "height": 720,
+  "clips": [
+    {
+      "file": "Teak_wood_plank_on_workbench_20261016131508.mp4",
+      "length": 3.5
+    },
+    {
+      "file": "Hands_cutting_timber_on_machine_20261016144842.mp4",
+      "length": 5.5
+    },
+    {
+      "file": "Craftsperson_sanding_teak_timber_1080p_20261016145110.mp4",
+      "length": 5.1
+    },
+    {
+      "file": "Furniture_maker_assembling_bed_f…_20261016150230.mp4",
+      "length": 4.6
+    },
+    {
+      "file": "Craftsperson_applying_wood_finish_1080p_20261016150802.mp4",
+      "length": 4.5
+    },
+    {
+      "file": "Furniture_maker_assembling_woode…_1080p_20261016165450.mp4",
+      "length": 4
+    },
+    {
+      "file": "Attaching_fabric_to_sofa_frame_20261016210216.mp4",
+      "length": 10
+    },
+    {
+      "file": "../../public/renders/hero.webp",
+      "length": 2.5
+    }
+  ]
+}

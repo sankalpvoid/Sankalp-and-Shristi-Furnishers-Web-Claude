@@ -30,15 +30,15 @@ export interface MakingSequenceConfig {
 }
 
 export const makingSequence: MakingSequenceConfig = {
-  enabled: false, // flip to true once public/making/* has been generated and committed
+  enabled: true, // built from assets/manufacturing-videos via `npm run prepare:making`
   video: "/making/sequence.mp4",
   videoSmall: "/making/sequence-sm.mp4",
   poster: "/making/poster.jpg",
   finalFrame: "/making/final.jpg",
-  trackVh: 450,
-  trackVhMobile: 360,
+  trackVh: 600,
+  trackVhMobile: 480,
   smoothing: 0.16,
-  label: "AI-generated placeholder footage · not our workshop",
+  label: "AI-generated placeholder footage and render · not our workshop",
   captions: [
     { from: 0, to: 0.16, eyebrow: "Sankalp & Shristi Furnishers", heading: "Crafted for Living", ctas: true },
     { from: 0.84, to: 1, eyebrow: "Made with intention", heading: "From frame to form", ctas: true },

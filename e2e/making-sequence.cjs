@@ -27,7 +27,8 @@ async function run(b, label, viewport, opts = {}) {
     await ctx.close(); return;
   }
 
-  if (MODE !== "fallback" && (await p.locator("video").count())) check(Math.abs(g0.h - g0.vh * (viewport.width < 600 ? 3.6 : 4.5)) < 8, `track height is ${(g0.h / g0.vh).toFixed(2)} viewports`);
+  const want = await p.evaluate((m) => parseFloat(getComputedStyle(document.querySelector("section.mk-seq")).getPropertyValue(m ? "--track-vh-m" : "--track-vh")) / 100, viewport.width <= 768);
+  if (MODE !== "fallback" && (await p.locator("video").count())) check(Math.abs(g0.h - g0.vh * want) < 8, `track height is ${(g0.h / g0.vh).toFixed(2)} viewports (configured ${want})`);
   const total = g0.h - g0.pinH;
   const at = async (frac) => { await p.evaluate((y) => window.scrollTo(0, y), g0.top - 76 + total * frac); await sleep(900); };
   const state = () => p.evaluate(() => { const v = document.querySelector("video"); const g = document.querySelector("section.mk-seq-cap,.mk-seq-cap[data-on=true]"); return { t: v ? v.currentTime : null, d: v ? v.duration : null, failed: !v, cap: document.querySelector('.mk-seq-cap[data-on="true"] h2')?.textContent ?? null }; });
@@ -46,7 +47,7 @@ async function run(b, label, viewport, opts = {}) {
     await ctx.close(); return;
   }
 
-  check(s.d > 10 && s.d < 30, `video loaded (${s.d?.toFixed(1)} s)`);
+  check(s.d > 10 && s.d < 120, `video loaded (${s.d?.toFixed(1)} s)`);
   check(s.cap === "Crafted for Living", `opening caption visible (“${s.cap}”)`);
   const pin1 = await geom();
   check(Math.abs(pin1.pinTop - 76) < 3, `frame is pinned under the header (top=${Math.round(pin1.pinTop)})`);
