@@ -274,13 +274,16 @@ export function bed({ size = "queen", headboard = "panel", storage = "none", woo
     if (storage === "drawers") for (let i = 0; i < 2; i++) { const dw = (W - 0.12) / 2; g.add(at(rbox(dw, baseH - 0.08, 0.012, 0.004, wmat(), 2), -W / 2 + 0.06 + dw / 2 + i * (dw + 0.02), legH + baseH / 2, L / 2 + 0.036)); g.add(at(rbox(0.12, 0.012, 0.014, 0.004, brass(), 2), -W / 2 + 0.06 + dw / 2 + i * (dw + 0.02), legH + baseH / 2, L / 2 + 0.046)); }
     if (storage === "lift") g.add(at(box(W + 0.085, 0.006, L + 0.065, plain("#000", 1)), 0, legH + baseH - 0.01, 0));
   }
+  const m0 = g.children.length;
   const top = legH + baseH;
   g.add(at(rbox(W - 0.02, 0.24, L - 0.06, 0.07, plain("#efe9dc", 0.9), 5), 0, top + 0.12, 0.01));
   g.add(at(rbox(W + 0.1, 0.3, L * 0.66, 0.1, fabricMat(bedding, "linen", [12, 12]), 6), 0, top + 0.17, L * 0.17));
   g.add(at(rbox(W * 0.94, 0.05, 0.38, 0.02, fabricMat(throwHex, "boucle", [8, 4]), 4), 0, top + 0.345, L * 0.42));
+  const m1 = g.children.length;
   const np = W > 1.2 ? 2 : 1;
   for (let i = 0; i < np; i++) { const pw = np === 2 ? W / 2 - 0.1 : 0.62; const p = rbox(pw, 0.15, 0.46, 0.07, fabricMat("#f0eadd", "linen"), 6); p.position.set(np === 2 ? (i ? 1 : -1) * (W / 4) : 0, top + 0.31, -L / 2 + 0.34); p.rotation.x = -0.28; g.add(p); }
   if (W > 1.2) { const p = rbox(0.5, 0.11, 0.3, 0.05, fabricMat(throwHex, "linen"), 5); p.position.set(0.12, top + 0.4, -L / 2 + 0.48); p.rotation.set(-0.5, 0.15, 0); g.add(p); }
+  const m2 = g.children.length;
   // headboard
   const hbTop = low ? 0.78 : headboard === "arched" ? 1.5 : 1.2, hz = -L / 2 - 0.06;
   const hbH = hbTop - 0.1;
@@ -290,9 +293,9 @@ export function bed({ size = "queen", headboard = "panel", storage = "none", woo
   } else if (headboard === "slatted") {
     const n = Math.round((W + 0.1) / 0.075);
     g.add(at(box(W + 0.14, 0.05, 0.07, wmat()), 0, 0.1 + 0.03, hz));
-    g.add(at(box(W + 0.14, 0.07, 0.07, wmat()), 0, 0.1 + hbH - 0.02, hz));
+    const topRail = at(box(W + 0.14, 0.07, 0.07, wmat()), 0, 0.1 + hbH - 0.02, hz); topRail.userData.rail = true; g.add(topRail);
     g.add(at(box(W + 0.1, hbH - 0.1, 0.012, plain("#1c1613", 1)), 0, 0.1 + hbH / 2, hz - 0.045));
-    for (let i = 0; i < n; i++) g.add(at(rbox(0.04, hbH - 0.1, 0.05, 0.008, wmat(), 2), -W / 2 - 0.02 + ((i + 0.5) * (W + 0.04)) / n, 0.1 + hbH / 2, hz));
+    for (let i = 0; i < n; i++) { const sl = at(rbox(0.04, hbH - 0.1, 0.05, 0.008, wmat(), 2), -W / 2 - 0.02 + ((i + 0.5) * (W + 0.04)) / n, 0.1 + hbH / 2, hz); sl.userData.slat = true; g.add(sl); }
   } else if (headboard === "arched") {
     const shp = new THREE.Shape(); const hw = (W + 0.14) / 2, ys = hbH - hw;
     shp.moveTo(-hw, 0); shp.lineTo(hw, 0); shp.lineTo(hw, ys); shp.absarc(0, ys, hw, 0, Math.PI, false); shp.lineTo(-hw, 0);
@@ -305,6 +308,8 @@ export function bed({ size = "queen", headboard = "panel", storage = "none", woo
     for (let i = 1; i < n; i++) g.add(at(box(0.006, hbH - 0.2, 0.006, fabricMat(new THREE.Color(fabric).multiplyScalar(0.7).getStyle(), ft)), -W / 2 - 0.07 + ((i) * (W + 0.14)) / n, 0.1 + hbH / 2, hz + 0.07));
   }
   g.userData = { width: W + 0.14, depth: L };
+    // part tags for the matte / ID passes (tools/render/matte.cjs)
+  g.children.forEach((c, k) => { if (c.userData.slat) return; c.userData.part = k < m0 ? "frame" : k < m0 + 2 ? "bedding" : k < m1 ? "throw" : k < m2 ? "pillow" : "head"; });
   return g;
 }
 
