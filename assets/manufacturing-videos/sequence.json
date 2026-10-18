@@ -7,13 +7,52 @@
   "crf": 24,
   "crfSmall": 27,
   "clips": [
-    { "file": "Teak_wood_plank_on_workbench_20261016131508.mp4", "start": 0, "end": 3.5, "crossfade": 0.6 },
-    { "file": "Hands_cutting_timber_on_machine_20261016144842.mp4", "start": 4.0, "end": 9.5, "crossfade": 0.6 },
-    { "file": "Craftsperson_sanding_teak_timber_1080p_20261016145110.mp4", "start": 4.8, "end": 9.9, "crossfade": 0.6 },
-    { "file": "Furniture_maker_assembling_bed_f…_20261016150230.mp4", "start": 3.0, "end": 7.6, "crossfade": 0.6 },
-    { "file": "Craftsperson_applying_wood_finish_1080p_20261016150802.mp4", "start": 3.5, "end": 8.0, "crossfade": 0.6 },
-    { "file": "Furniture_maker_assembling_woode…_1080p_20261016165450.mp4", "start": 1.5, "end": 5.5, "crossfade": 0.8 },
-    { "file": "Attaching_fabric_to_sofa_frame_20261016210216.mp4", "start": 0, "end": 10, "crossfade": 1.0 },
-    { "image": "../../public/renders/hero.webp", "duration": 2.5, "crossfade": 0 }
+    {
+      "file": "Teak_wood_plank_on_workbench_20261016131508.mp4",
+      "start": 0,
+      "end": 3.5,
+      "crossfade": 0.35
+    },
+    {
+      "file": "Hands_cutting_timber_on_machine_20261016144842.mp4",
+      "start": 4.0,
+      "end": 9.5,
+      "crossfade": 0.35
+    },
+    {
+      "file": "Craftsperson_sanding_teak_timber_1080p_20261016145110.mp4",
+      "start": 4.8,
+      "end": 9.9,
+      "crossfade": 0.35
+    },
+    {
+      "file": "Furniture_maker_assembling_bed_f…_20261016150230.mp4",
+      "start": 3.0,
+      "end": 7.6,
+      "crossfade": 0.35
+    },
+    {
+      "file": "Craftsperson_applying_wood_finish_1080p_20261016150802.mp4",
+      "start": 3.5,
+      "end": 8.0,
+      "crossfade": 0.2
+    },
+    {
+      "file": "Furniture_maker_assembling_woode…_1080p_20261016165450.mp4",
+      "start": 1.5,
+      "end": 5.5,
+      "crossfade": 0.2
+    },
+    {
+      "file": "Attaching_fabric_to_sofa_frame_20261016210216.mp4",
+      "start": 0.5,
+      "end": 9.0,
+      "crossfade": 0.9
+    },
+    {
+      "image": "../../public/renders/hero.webp",
+      "duration": 2.5,
+      "crossfade": 0
+    }
   ]
 }

@@ -294,3 +294,94 @@ h3 { font-size: clamp(1.3rem, 1.9vw, 1.65rem); letter-spacing: -0.02em; }
   .mk-seq-progress { bottom: 76px; }
 }
 @media (prefers-reduced-motion: reduce) { .mk-seq-cap, .mk-seq-video { transition: none; } }
+
+
+/* ======================================================================
+   Cinematic pass: one reveal, a typographic rhythm, a sequence with stage UI
+   ====================================================================== */
+
+/* ---------- reveal (see components/Reveal.tsx; content is visible without JS) ---------- */
+.rv { opacity: 0; transform: translateY(24px); transition: opacity .8s cubic-bezier(.2, .7, .2, 1), transform .8s cubic-bezier(.2, .7, .2, 1); }
+.rv.in { opacity: 1; transform: none; }
+.rv-mask { clip-path: inset(0 0 14% 0); opacity: .001; transition: clip-path 1.2s cubic-bezier(.2, .7, .2, 1), opacity .5s ease; }
+.rv-mask img, .rv-mask svg { transform: scale(1.08); transition: transform 1.6s cubic-bezier(.2, .7, .2, 1); }
+.rv-mask.in { clip-path: inset(0); opacity: 1; }
+.rv-mask.in img, .rv-mask.in svg { transform: none; }
+@media (prefers-reduced-motion: reduce) { .rv, .rv-mask, .rv-mask img, .rv-mask svg { opacity: 1; transform: none; clip-path: none; transition: none; } }
+
+/* ---------- sequence: stage caption, ticks, skip ---------- */
+.mk-seq-sub { margin: 14px 0 0; color: #cdc6b8; font-size: 1rem; max-width: 38ch; }
+.mk-seq-ctas { margin-top: 22px; }
+.mk-seq-more { margin: 18px 0 0; }
+.mk-seq-stage { position: absolute; left: max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter))); bottom: clamp(34px, 7vh, 72px); display: flex; align-items: baseline; gap: 18px; opacity: 0; transform: translateY(10px); transition: opacity .45s ease, transform .45s ease; pointer-events: none; text-shadow: 0 1px 24px #000a; }
+.mk-seq-stage[data-on="true"] { opacity: 1; transform: none; }
+.mk-seq-stage .n { font: 300 clamp(2.8rem, 6vw, 5rem)/0.9 var(--font-serif); color: transparent; -webkit-text-stroke: 1px #f4efe5; letter-spacing: -0.04em; }
+.mk-seq-stage .n i { font: 600 .7rem/1 var(--font-sans); letter-spacing: .16em; color: #f4efe5cc; -webkit-text-stroke: 0; margin-left: 6px; font-style: normal; }
+.mk-seq-stage h2 { margin: 0; font-size: clamp(1.4rem, 2.6vw, 2.2rem); color: #f4efe5; }
+.mk-seq-progress { height: 3px; }
+.mk-seq-progress > i { position: absolute; top: -3px; width: 1px; height: 9px; background: #f4efe566; }
+.mk-seq-progress > i[data-on="true"] { background: var(--brass-soft); }
+.mk-seq-skipbtn { position: absolute; top: 16px; right: var(--gutter); z-index: 3; font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; text-decoration: none; color: #f4efe5; background: #00000080; padding: 9px 14px; border: 1px solid #ffffff44; transition: background .25s, border-color .25s; }
+.mk-seq-skipbtn:hover { background: #000c; border-color: var(--brass-soft); }
+.mk-seq-skipbtn:focus-visible { outline-color: var(--gold-soft); }
+.mk-seq-pin::after { content: ""; position: absolute; inset: auto 0 0 0; height: 38%; background: linear-gradient(to top, #12100e99, transparent); pointer-events: none; }
+.mk-seq-cap, .mk-seq-stage, .mk-seq-label, .mk-seq-progress, .mk-seq-skipbtn { z-index: 2; }
+.mk-seq-cap { background: #1c1b19ee; }
+@media (max-width: 768px) {
+  .mk-seq-stage { left: 16px; right: 16px; bottom: 96px; gap: 12px; }
+  .mk-seq-skipbtn { top: 10px; right: 12px; padding: 8px 11px; }
+  .mk-seq-label { top: 50px; }
+  .mk-seq-cap { bottom: 92px; }
+  .mk-seq-ctas .btn { flex: 1 1 100%; justify-content: center; text-align: center; }
+}
+
+/* ---------- arrival: the finished piece, full width ---------- */
+.arrival { padding-top: clamp(64px, 9vw, 130px); }
+.arrival-top { display: grid; gap: 28px 80px; align-items: end; padding-bottom: clamp(32px, 5vw, 64px); }
+@media (min-width: 960px) { .arrival-top { grid-template-columns: minmax(0, 7fr) minmax(0, 4.4fr); } }
+.arrival-title { font-size: clamp(3rem, 8.4vw, 8rem); line-height: .94; letter-spacing: -0.035em; margin: 0; max-width: 11ch; }
+.arrival-side .lede { margin-bottom: 1.6rem; }
+.arrival-media { position: relative; aspect-ratio: 16/8; background: var(--sand); overflow: hidden; }
+.arrival-media img, .arrival-media svg { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 760px) { .arrival-media { aspect-ratio: 4/3.4; } }
+.arrival .hero-meta { margin-top: 28px; }
+.arrival .hero-meta { margin-bottom: clamp(36px, 5vw, 64px); }
+
+/* ---------- collections: two large pieces then a typographic index ---------- */
+.coll-feature { display: grid; gap: 28px; }
+@media (min-width: 900px) {
+  .coll-feature { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(28px, 4vw, 64px); align-items: start; }
+  .coll-feature > :nth-child(2) { margin-top: clamp(56px, 8vw, 120px); }
+}
+.coll-feature .tile .media { aspect-ratio: 4/3.2; }
+.coll-feature > :nth-child(1) .tile .media { aspect-ratio: 4/3.4; }
+@media (min-width: 900px) { .coll-feature > :nth-child(2) .tile .media { aspect-ratio: 4/5; } }
+.ledger { list-style: none; margin: clamp(48px, 7vw, 96px) 0 0; padding: 0; border-top: 1px solid var(--ink); }
+.ledger-row { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr) auto 2rem; align-items: baseline; gap: 12px 20px; padding: 22px 0; border-bottom: 1px solid var(--line); text-decoration: none; transition: padding-left .3s cubic-bezier(.2, .7, .2, 1); }
+.ledger-row:hover { padding-left: 12px; }
+.ledger-n { font: 400 clamp(1.8rem, 3.4vw, 3rem)/1 var(--font-serif); color: transparent; -webkit-text-stroke: 1px var(--brass); transition: color .3s; }
+.ledger-row:hover .ledger-n { color: var(--brass); }
+.ledger-t { font-family: var(--font-serif); font-size: clamp(1.4rem, 2.6vw, 2.2rem); letter-spacing: -0.02em; }
+.ledger-s { font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.ledger-go { text-align: right; transition: transform .3s; }
+.ledger-row:hover .ledger-go { transform: translateX(6px); }
+@media (max-width: 560px) { .ledger-row { grid-template-columns: 3rem minmax(0, 1fr) 1.5rem; } .ledger-s { grid-column: 2; grid-row: 2; } .ledger-go { grid-row: 1; grid-column: 3; } }
+
+/* ---------- featured + design: staggered columns instead of a flat grid ---------- */
+@media (min-width: 760px) { .p-grid.stagger > :nth-child(even) { margin-top: 72px; } }
+@media (min-width: 640px) { .design-grid > :nth-child(even) { margin-top: 56px; } }
+.dtile { border: 0; }
+.showroom-img { aspect-ratio: 16/10; }
+.showroom-img img, .showroom-img svg { width: 100%; height: 100%; object-fit: cover; }
+
+/* ---------- trust: numerals over rules ---------- */
+.trust-grid .num { display: block; padding-top: 14px; }
+
+/* ---------- close ---------- */
+.final { padding-block: clamp(88px, 12vw, 180px); }
+.final-t { font-size: clamp(2.8rem, 7.6vw, 7rem); line-height: .96; letter-spacing: -0.035em; max-width: 12ch; margin-bottom: .3em; }
+.final .lede { margin-bottom: 2rem; }
+.final .row { gap: 12px; }
+.mk-seq-cap { max-width: 640px; }
+.mk-seq-ctas { gap: 10px; }
+.mk-seq-ctas .btn { padding-inline: 1.5em; }
