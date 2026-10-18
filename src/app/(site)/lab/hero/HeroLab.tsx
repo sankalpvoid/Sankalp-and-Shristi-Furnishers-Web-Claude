@@ -13,8 +13,12 @@ import "./hero-lab.css";
 type Group = { d: string; bbox: number[] }[];
 const G = trace.groups as unknown as Record<string, Group>;
 const SLATS = G.slat;
+const LEVELS = G.roomLevels; // nested smooth contours around the object, see tools/render/trace-bed.py
+const LV = (trace.groups as unknown as { roomLevelsMeta: { t0: number; ratio: number; n: number }[] }).roomLevelsMeta[0];
 // Only the slats draw while the camera is close; the rest of the object is drawn once the view has pulled back.
 const ORDER: [string, number, number][] = [["head", 0.34, 0.46], ["pillow", 0.4, 0.5], ["bedding", 0.44, 0.55], ["throw", 0.49, 0.57], ["frame", 0.5, 0.62]];
+// Phones: the camera has the whole bed framed from p≈0.32, so the drawing grows leftward from the headboard inside a steady frame.
+const ORDER_M: [string, number, number][] = [["head", 0.26, 0.38], ["pillow", 0.32, 0.42], ["bedding", 0.36, 0.48], ["throw", 0.42, 0.52], ["frame", 0.44, 0.58]];
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const seg = (p: number, a: number, b: number) => clamp((p - a) / (b - a));
@@ -24,9 +28,39 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 const CFG = {
   // f→v: image point f is placed at stage point v; s is the zoom. Start = on the headboard slats, end = the whole plate.
-  desktop: { par: "xMidYMid slice", S0: 5.2, f0: [955, 450], v0: [850, 590], s1: 1, f1: [750, 600], v1: [750, 600], sc1: 0.4, posEnd: 0.72, track: 340 },
-  mobile: { par: "xMidYMid meet", S0: 7.6, f0: [900, 450], v0: [750, 600], s1: 1.2, f1: [716, 600], v1: [750, 372], sc1: 0.62, posEnd: 0.5, track: 290 },
+  desktop: { par: "xMidYMid slice", S0: 5.2, f0: [955, 450], v0: [850, 590], s1: 1, f1: [750, 600], v1: [750, 600], sc1: 0.4, track: 340 },
+  // Phones: a stacked composition that never swaps. The drawing / finished plate lives in the upper part of the stage and the
+  // headline stays big below it (exactly as at the opening); only near the end does the headline rise to sit under the plate.
+  // The headboard fits the width at first; the whole bed is framed by p=0.32 and stays centred between header and headline until
+  // the reveal, when the camera rises to the final plate position.
+  // keys: [p, zoom, fx, fy, vx, vy]   (screen y of an image point = oy + vy·scale, oy = letterbox offset)
+  mobile: {
+    par: "xMidYMid meet", S0: 7.6, f0: [900, 450], v0: [750, 560], s1: 1.2, f1: [716, 600], v1: [750, -158], sc1: 0.62, track: 290,
+    keys: [[0, 7.6, 900, 450, 750, 560], [0.04, 7.6, 900, 450, 750, 560], [0.2, 2.5, 955, 470, 750, 50], [0.24, 2.5, 955, 470, 750, 50], [0.32, 1.2, 716, 600, 750, 50], [0.66, 1.2, 716, 600, 750, 50], [0.95, 1.2, 716, 600, 750, -158], [1, 1.2, 716, 600, 750, -158]] as number[][],
+  },
 };
+
+/** Monotone cubic (Fritsch–Carlson) through (xs, ys): smooth, never overshoots, holds flat across equal keys. */
+function pchip(xs: number[], ys: number[]) {
+  const n = xs.length, h: number[] = [], d: number[] = [], m: number[] = new Array(n).fill(0);
+  for (let i = 0; i < n - 1; i++) { h[i] = xs[i + 1] - xs[i]; d[i] = (ys[i + 1] - ys[i]) / h[i]; }
+  for (let i = 1; i < n - 1; i++) {
+    if (d[i - 1] * d[i] <= 0) m[i] = 0;
+    else { const w1 = 2 * h[i] + h[i - 1], w2 = h[i] + 2 * h[i - 1]; m[i] = (w1 + w2) / (w1 / d[i - 1] + w2 / d[i]); }
+  }
+  return (x: number) => {
+    if (x <= xs[0]) return ys[0];
+    if (x >= xs[n - 1]) return ys[n - 1];
+    let i = 0; while (x > xs[i + 1]) i++;
+    const t = (x - xs[i]) / h[i], t2 = t * t, t3 = t2 * t;
+    return (2 * t3 - 3 * t2 + 1) * ys[i] + (t3 - 2 * t2 + t) * h[i] * m[i] + (-2 * t3 + 3 * t2) * ys[i + 1] + (t3 - t2) * h[i] * m[i + 1];
+  };
+}
+const MOBILE_CAM = (() => {
+  const k = CFG.mobile.keys, xs = k.map((r) => r[0]);
+  const f = [1, 2, 3, 4, 5].map((c) => pchip(xs, k.map((r) => (c === 1 ? Math.log(r[1]) : r[c]))));
+  return (p: number) => ({ s: Math.exp(f[0](p)), fx: f[1](p), fy: f[2](p), vx: f[3](p), vy: f[4](p) });
+})();
 
 export type HeroCat = { slug: string; name: string };
 
@@ -41,52 +75,57 @@ export function HeroLab({ cats }: { cats: HeroCat[] }) {
     const cam = sv.querySelector<SVGGElement>("[data-cam]")!, lines = sv.querySelector<SVGGElement>("[data-lines]")!;
     const slatEls = q<SVGPathElement>("[data-slat]");
     const grpEls = Object.fromEntries(ORDER.map(([k]) => [k, q<SVGPathElement>(`[data-g="${k}"]`)]));
-    const shadow = sv.querySelector<SVGElement>("[data-shadow]")!, archMask = sv.querySelector<SVGPathElement>("[data-arch]")!, archEdge = sv.querySelector<SVGPathElement>("[data-arch-edge]")!;
+    const shadow = sv.querySelector<SVGElement>("[data-shadow]")!, levelEls = q<SVGPathElement>("[data-level]");
     const st1 = sv.querySelector<SVGStopElement>("[data-st1]")!, st2 = sv.querySelector<SVGStopElement>("[data-st2]")!;
     const light = pinEl.querySelector<HTMLElement>("[data-light]")!, fin = pinEl.querySelector<HTMLElement>("[data-final]")!;
     const cats_ = pinEl.querySelector<HTMLElement>("[data-cats]")!, cue = pinEl.querySelector<HTMLElement>("[data-cue]")!, tag = pinEl.querySelector<HTMLElement>("[data-tag]")!;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
     const mobMq = window.matchMedia("(max-width: 768px)");
 
-    let p = 0, intro = 0, raf = 0, introRaf = 0, cfg = CFG.desktop, baseScale = 1, stageH = 800, blockH = 300, headerH = 76, introDone = false;
+    let p = 0, intro = 0, raf = 0, introRaf = 0, cfg: (typeof CFG)["desktop"] | (typeof CFG)["mobile"] = CFG.desktop, baseScale = 1, stageH = 800, blockH = 300, headerH = 76, introDone = false, measuredW = -1;
     const off = (e: SVGPathElement, r: number) => { e.style.strokeDashoffset = String(1 - clamp(r)); e.style.visibility = r <= 0.002 ? "hidden" : "visible"; };
 
     const render = () => {
       const stat = reduce.matches;
       const pp = stat ? 1 : p;
       const mob = mobMq.matches;
-      const [fx0, fy0] = cfg.f0, [vx0, vy0] = cfg.v0, [fx1, fy1] = cfg.f1, [vx1, vy1] = cfg.v1;
-      // camera: dolly out from the headboard to the whole image
-      const t = ease(seg(pp, 0.04, 0.72));
-      const s = Math.pow(cfg.S0, 1 - t) * Math.pow(cfg.s1, t);
-      const tp = ease(seg(pp, 0.04, cfg.posEnd)); // position can settle before the zoom does (phones centre the object sooner)
-      const fx = lerp(fx0, fx1, tp), fy = lerp(fy0, fy1, tp), vx = lerp(vx0, vx1, tp), vy = lerp(vy0, vy1, tp);
+      // camera: dolly out from the headboard to the whole image (desktop: one eased move; phones: keyframes, see CFG)
+      let s: number, fx: number, fy: number, vx: number, vy: number;
+      if (mob) ({ s, fx, fy, vx, vy } = MOBILE_CAM(pp));
+      else {
+        const [fx0, fy0] = cfg.f0, [vx0, vy0] = cfg.v0, [fx1, fy1] = cfg.f1, [vx1, vy1] = cfg.v1;
+        const t = ease(seg(pp, 0.04, 0.72));
+        s = Math.pow(cfg.S0, 1 - t) * Math.pow(cfg.s1, t);
+        fx = lerp(fx0, fx1, t); fy = lerp(fy0, fy1, t); vx = lerp(vx0, vx1, t); vy = lerp(vy0, vy1, t);
+      }
       cam.setAttribute("transform", `translate(${vx.toFixed(2)} ${vy.toFixed(2)}) scale(${s.toFixed(4)}) translate(${-fx.toFixed(2)} ${-fy.toFixed(2)})`);
       lines.style.strokeWidth = String((1.15 / (baseScale * s)).toFixed(3));
-      archEdge.style.strokeWidth = String((1.5 / (baseScale * s)).toFixed(3));
+      
       // drawing: slats on load; the rest as the camera pulls back
       const iv = stat ? 1 : intro;
       slatEls.forEach((e, i) => off(e, easeOut(clamp((iv - i * 0.018) / 0.62))));
-      for (const [k, a, b] of ORDER) grpEls[k].forEach((e, i) => off(e, ease(seg(pp, a + i * 0.01, b))));
+      for (const [k, a, b] of mob ? ORDER_M : ORDER) grpEls[k].forEach((e, i) => off(e, ease(seg(pp, a + i * 0.01, b))));
       const fade = 1 - seg(pp, 0.62, 0.78);
       lines.style.opacity = (stat ? 0 : fade).toFixed(3);
       // emergence: the object appears inside its own silhouette, top to bottom, following the drawing
       const Y = lerp(290, 1060, ease(seg(pp, 0.5, 0.7)));
       st1.setAttribute("offset", clamp((Y - 90) / 1200).toFixed(4)); st2.setAttribute("offset", clamp(Y / 1200).toFixed(4));
       if (pp <= 0.5) { st1.setAttribute("offset", "0"); st2.setAttribute("offset", "0.001"); }
-      // then its architecture: an arch opens behind it and widens to the whole frame
-      // phase 1: an arch opens sideways behind the bed (crown fixed). phase 2: it widens past the frame.
-      const r1 = easeOut(seg(pp, 0.64, 0.76)), r2 = Math.pow(seg(pp, 0.78, 0.95), 1.7);
-      const R = r2 > 0 ? lerp(560, 2300, r2) : 14 + r1 * 546;
-      const ys = r2 > 0 ? lerp(810, 300, r2) : 250 + R; // springline: crown stays at y=250 while it opens
-      const base = lerp(985, 1560, r2);
-      const d = pp >= 0.64 ? `M${716 - R} ${base}L${716 - R} ${ys}A${R} ${R} 0 0 1 ${716 + R} ${ys}L${716 + R} ${base}Z` : "";
-      archMask.setAttribute("d", d); archEdge.setAttribute("d", d);
-      archEdge.style.opacity = (d ? 1 - seg(pp, 0.88, 0.96) : 0).toFixed(3);
+      // then the room: it grows outward from the object's own silhouette as nested smooth contours (wall above and floor below
+      // arrive together; no straight or arched edge ever crosses the frame). We crossfade between adjacent contour levels.
+      const g = easeOut(seg(pp, 0.66, 0.78)) * 0.3 + Math.pow(seg(pp, 0.74, 0.95), 1.4) * 0.7;
+      const kf = pp < 0.66 ? -1 : g * (LV.n - 1);
+      const k0 = Math.floor(kf);
+      levelEls.forEach((e, k) => {
+        const o = k < k0 ? 1 : k === k0 ? 1 : k === k0 + 1 ? kf - k0 : 0;
+        e.style.opacity = o.toFixed(3); e.style.display = o <= 0.002 ? "none" : "";
+      });
       // type: huge → resolved at top left
-      const tt = ease(seg(pp, 0.08, 0.52));
+      // desktop: the headline climbs to the top-left early. phones: it stays low until the plate is revealed, then rises under it.
+      const tt = mob ? ease(seg(pp, 0.6, 0.84)) : ease(seg(pp, 0.08, 0.52));
       const sc = lerp(1, cfg.sc1, tt);
-      const pad0 = mob ? 96 : stageH * 0.075, pad1 = mob ? 18 : stageH * 0.085;
+      const plateB = ((stageH - 1200 * baseScale) / 2) + (cfg.v1[1] + (1200 - cfg.f1[1]) * cfg.s1) * baseScale;
+      const pad0 = mob ? 96 : stageH * 0.075, pad1 = mob ? plateB + 16 : stageH * 0.085;
       const ty = lerp(stageH - blockH - pad0, pad1, tt);
       ti.style.setProperty("--sc", sc.toFixed(4));
       ti.style.transform = `translate3d(0,${ty.toFixed(1)}px,0) scale(${sc.toFixed(4)})`;
@@ -99,10 +138,10 @@ export function HeroLab({ cats }: { cats: HeroCat[] }) {
       cats_.style.opacity = seg(pp, 0.92, 1).toFixed(3); cats_.style.pointerEvents = pp > 0.95 ? "auto" : "none";
       if (mob) { // phones: pin the tag to the plate's bottom edge
         const oy = (stageH - 1200 * baseScale) / 2;
-        tag.style.top = `${(((1200 - fy1) * cfg.s1 + vy1) * baseScale + oy - 26).toFixed(0)}px`;
+        tag.style.top = `${(((1200 - cfg.f1[1]) * cfg.s1 + cfg.v1[1]) * baseScale + oy - 26).toFixed(0)}px`;
       } else tag.style.top = "";
       tag.style.opacity = seg(pp, 0.84, 0.94).toFixed(3);
-      shadow.style.opacity = (ease(seg(pp, 0.5, 0.66)) * (1 - seg(pp, 0.7, 0.8))).toFixed(3);
+      shadow.style.opacity = (ease(seg(pp, 0.5, 0.66)) * (1 - seg(pp, 0.7, 0.84))).toFixed(3);
       fin.toggleAttribute("inert", f < 0.6); cats_.toggleAttribute("inert", pp <= 0.95 && !stat);
     };
 
@@ -111,7 +150,10 @@ export function HeroLab({ cats }: { cats: HeroCat[] }) {
       sv.setAttribute("preserveAspectRatio", cfg.par);
       const r = sv.getBoundingClientRect();
       baseScale = cfg.par.includes("slice") ? Math.max(r.width / 1500, r.height / 1200) : Math.min(r.width / 1500, r.height / 1200);
-      stageH = pinEl.clientHeight; blockH = ti.offsetHeight;
+      stageH = pinEl.clientHeight;
+      // Measure the headline at unit scale: its eyebrow is counter-scaled (and can re-wrap), so reading the height at the
+      // current scale would feed the previous frame back into this one and make the position path-dependent.
+      if (measuredW !== window.innerWidth) { ti.style.setProperty("--sc", "1"); blockH = ti.offsetHeight; measuredW = window.innerWidth; }
       headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--header-h")) || 76;
       el.style.setProperty("--hl-track", String(reduce.matches ? 0 : cfg.track));
       const rect = el.getBoundingClientRect();
@@ -163,7 +205,7 @@ export function HeroLab({ cats }: { cats: HeroCat[] }) {
               </linearGradient>
               <mask id="hl-room" maskUnits="userSpaceOnUse" x="-800" y="-900" width="3100" height="2800">
                 <rect x="-800" y="-900" width="3100" height="2800" fill="#000" />
-                <path data-arch="" fill="#fff" d="" />
+                {LEVELS.map((l, k) => <path key={k} data-level="" d={l.d} fill="#fff" fillRule="evenodd" style={{ display: "none" }} />)}
               </mask>
               <mask id="hl-obj" maskUnits="userSpaceOnUse" x="-800" y="-900" width="3100" height="2800">
                 <rect x="-800" y="-900" width="3100" height="2800" fill="#000" />
@@ -176,7 +218,6 @@ export function HeroLab({ cats }: { cats: HeroCat[] }) {
             <g data-cam="">
               <ellipse data-shadow="" cx="690" cy="915" rx="560" ry="74" fill="url(#hl-sh)" opacity="0" />
               <image href="/renders/products/slatted-headboard-bed.webp" width="1500" height="1200" mask="url(#hl-room)" />
-              <path data-arch-edge="" className="hl-arch-edge" d="" fill="none" />
               <image href="/renders/products/slatted-headboard-bed.webp" width="1500" height="1200" mask="url(#hl-obj)" />
               <g data-lines="" className="hl-lines">
                 <g clipPath="url(#hl-head-clip)">
