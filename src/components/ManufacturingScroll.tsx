@@ -51,9 +51,9 @@ export function ManufacturingScroll({ cfg }: { cfg: MakingSequenceConfig }) {
   }, [near, isStatic, cfg.video, cfg.videoSmall]);
 
   const activeCaption = useCallback((p: number) => {
-    const i = cfg.captions.findIndex((c) => p >= c.from && p <= c.to);
-    return i;
-  }, [cfg.captions]);
+    const t = p * cfg.duration;
+    return cfg.captions.findIndex((c) => t >= c.fromS && t <= c.toS);
+  }, [cfg.captions, cfg.duration]);
 
   // Scroll → video time.
   useEffect(() => {
@@ -70,7 +70,11 @@ export function ManufacturingScroll({ cfg }: { cfg: MakingSequenceConfig }) {
       target = p * duration();
       const c = activeCaption(p);
       if (c !== lastCaption) { lastCaption = c; setCaption(c); }
-      if (bar.current) bar.current.style.transform = `scaleX(${p})`;
+      if (bar.current) {
+        bar.current.style.transform = `scaleX(${p})`;
+        const t = p * cfg.duration;
+        bar.current.parentElement?.querySelectorAll<HTMLElement>("i[data-from]").forEach((tick) => { tick.dataset.on = t >= Number(tick.dataset.from) ? "true" : "false"; });
+      }
     };
     const tick = () => {
       raf = 0;
@@ -101,18 +105,17 @@ export function ManufacturingScroll({ cfg }: { cfg: MakingSequenceConfig }) {
       vid.removeEventListener("loadedmetadata", onMeta);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [isStatic, src, cfg.smoothing, activeCaption]);
+  }, [isStatic, src, cfg.smoothing, cfg.duration, activeCaption]);
 
-  const last = cfg.captions[cfg.captions.length - 1];
-  const caps = isStatic ? [last] : cfg.captions;
-  const shown = isStatic ? 0 : caption;
+  const last = cfg.captions.length - 1;
+  const shown = isStatic ? last : caption;
 
   return (
     <section
       ref={root}
       className={`mk-seq dark ${isStatic ? "is-static" : ""} ${ready ? "is-ready" : ""}`}
       style={{ "--track-vh": cfg.trackVh, "--track-vh-m": cfg.trackVhMobile } as React.CSSProperties}
-      aria-label="How we make a sofa — sequence of placeholder footage"
+      aria-label="How a sofa is made: a scroll-controlled sequence of placeholder footage"
     >
       <a className="mk-seq-skip" href="#after-sequence">Skip the animation</a>
       <div className="mk-seq-pin" ref={pin}>
@@ -135,21 +138,49 @@ export function ManufacturingScroll({ cfg }: { cfg: MakingSequenceConfig }) {
             />
           )}
         </div>
-        {caps.map((c, i) => (
-          <div key={c.heading} className="mk-seq-cap" data-on={i === shown ? "true" : "false"} aria-hidden={i === shown ? undefined : "true"}>
-            {c.eyebrow && <span className="eyebrow">{c.eyebrow}</span>}
-            <h2>{c.heading}</h2>
-            {c.ctas && (
-              <div className="row" style={{ marginTop: 22 }}>
-                <Link className="btn gold" href="/shop" tabIndex={i === shown ? 0 : -1}>Explore Furniture</Link>
-                <Link className="btn ghost" href="/design" tabIndex={i === shown ? 0 : -1}>Design Your Own</Link>
+        {cfg.captions.map((c, i) => {
+          if (isStatic && i !== last) return null;
+          const on = i === shown;
+          if (c.kind === "stage") {
+            return (
+              <div key={c.heading} className="mk-seq-stage" data-on={on ? "true" : "false"} aria-hidden="true">
+                <span className="n">{String(c.step).padStart(2, "0")}<i>/{String(cfg.stages).padStart(2, "0")}</i></span>
+                <h2>{c.heading}</h2>
               </div>
-            )}
-          </div>
-        ))}
+            );
+          }
+          return (
+            <div key={c.heading} className="mk-seq-cap" data-on={on ? "true" : "false"} aria-hidden={on ? undefined : "true"}>
+              {c.eyebrow && <span className="eyebrow">{c.eyebrow}</span>}
+              <h2>{c.heading}</h2>
+              {c.sub && <p className="mk-seq-sub">{c.sub}</p>}
+              {c.ctas && i === last && (
+                <div className="row mk-seq-ctas">
+                  <Link className="btn gold" href="/shop" tabIndex={on ? 0 : -1}>Explore Furniture</Link>
+                  <Link className="btn ghost" href="/design" tabIndex={on ? 0 : -1}>Design Your Own</Link>
+                  <Link className="btn ghost" href="/contact?intent=visit" tabIndex={on ? 0 : -1}>Plan a Visit</Link>
+                </div>
+              )}
+              {c.ctas && i !== last && (
+                <div className="row mk-seq-ctas">
+                  <Link className="btn gold" href="/shop" tabIndex={on ? 0 : -1}>Explore Furniture</Link>
+                  <Link className="btn ghost" href="/design" tabIndex={on ? 0 : -1}>Design Your Own</Link>
+                </div>
+              )}
+              {i === last && <p className="mk-seq-more"><Link className="linkarrow" href="/making" tabIndex={on ? 0 : -1}>See the stages in full</Link></p>}
+            </div>
+          );
+        })}
+        {!isStatic && <a className="mk-seq-skipbtn" href="#after-sequence">Skip animation <span aria-hidden>↓</span></a>}
         <span className="mk-seq-label">{cfg.label}</span>
-        {!isStatic && <div className="mk-seq-progress" aria-hidden="true"><div ref={bar} /></div>}
-        {!isStatic && <span className="mk-seq-hint" aria-hidden="true">Scroll</span>}
+        {!isStatic && (
+          <div className="mk-seq-progress" aria-hidden="true">
+            <div ref={bar} />
+            {cfg.captions.filter((c) => c.kind === "stage").map((c) => (
+              <i key={c.heading} style={{ left: `${((c.fromS - 0.4) / cfg.duration) * 100}%` }} data-from={c.fromS - 0.4} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

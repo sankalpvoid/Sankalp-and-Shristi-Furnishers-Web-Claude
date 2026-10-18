@@ -1,39 +1,47 @@
 {
-  "duration": 34.917,
+  "duration": 35.5,
   "width": 1280,
   "height": 720,
   "clips": [
     {
       "file": "Teak_wood_plank_on_workbench_20261016131508.mp4",
-      "length": 3.5
+      "length": 3.5,
+      "start": 0
     },
     {
       "file": "Hands_cutting_timber_on_machine_20261016144842.mp4",
-      "length": 5.5
+      "length": 5.5,
+      "start": 3.15
     },
     {
       "file": "Craftsperson_sanding_teak_timber_1080p_20261016145110.mp4",
-      "length": 5.1
+      "length": 5.1,
+      "start": 8.3
     },
     {
       "file": "Furniture_maker_assembling_bed_f…_20261016150230.mp4",
-      "length": 4.6
+      "length": 4.6,
+      "start": 13.05
     },
     {
       "file": "Craftsperson_applying_wood_finish_1080p_20261016150802.mp4",
-      "length": 4.5
+      "length": 4.5,
+      "start": 17.3
     },
     {
       "file": "Furniture_maker_assembling_woode…_1080p_20261016165450.mp4",
-      "length": 4
+      "length": 4,
+      "start": 21.6
     },
     {
       "file": "Attaching_fabric_to_sofa_frame_20261016210216.mp4",
-      "length": 10
+      "length": 8.5,
+      "start": 25.4
     },
     {
       "file": "../../public/renders/hero.webp",
-      "length": 2.5
+      "length": 2.5,
+      "start": 33
     }
   ]
 }

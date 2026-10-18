@@ -66,6 +66,9 @@ build(sw, sh, small, CRF_SMALL);
 const total = duration(big);
 run("ffmpeg", ["-y", "-hide_banner", "-loglevel", "error", "-i", big, "-frames:v", "1", "-q:v", "3", path.join(outDir, "poster.jpg")]);
 run("ffmpeg", ["-y", "-hide_banner", "-loglevel", "error", "-sseof", "-0.1", "-i", big, "-frames:v", "1", "-q:v", "3", "-update", "1", path.join(outDir, "final.jpg")]);
-fs.writeFileSync(path.join(outDir, "sequence.meta.json"), JSON.stringify({ duration: +total.toFixed(3), width: W, height: H, clips: clips.map((c) => ({ file: c.file, length: +c.len.toFixed(2) })) }, null, 2) + "\n");
+// Start time of each clip on the final timeline (after crossfade overlaps), for captions.
+let t = 0;
+const starts = clips.map((c, i) => { const s0 = t; t += c.len - Math.min(Math.max(0, c.crossfade || 0), c.len - 0.1, (clips[i + 1]?.len ?? 1) - 0.1); return +s0.toFixed(2); });
+fs.writeFileSync(path.join(outDir, "sequence.meta.json"), JSON.stringify({ duration: +total.toFixed(3), width: W, height: H, clips: clips.map((c, i) => ({ file: c.file, length: +c.len.toFixed(2), start: starts[i] })) }, null, 2) + "\n");
 const mb = (f) => (fs.statSync(f).size / 1048576).toFixed(1) + " MB";
 console.log(`Done: ${total.toFixed(1)} s · sequence.mp4 ${mb(big)} · sequence-sm.mp4 ${mb(small)}`);
