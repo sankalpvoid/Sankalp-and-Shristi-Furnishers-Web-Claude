@@ -8,7 +8,7 @@ function stage(o) {
   const wallX = Math.max(3.0, (o.cam ? o.cam[0] : 0) + 1.6);
   const r = K.room({ wallX, tone: o.tone, wallZ: o.wallZ ?? -1.5, patch: o.patch, sun: o.sun, sky: o.sky, fill: o.fill, hemi: o.hemi, sunElev: o.sunElev, grade: o.grade, winW: o.winW, winH: o.winH });
   scene.add(r.group);
-  const item = o.item; item.rotation.y = o.rot ?? 0; item.position.set(...(o.pos || [0, 0, 0])); scene.add(K.shadowAll(item));
+  const item = o.item; item.userData.isItem = true; item.rotation.y = o.rot ?? 0; item.position.set(...(o.pos || [0, 0, 0])); scene.add(K.shadowAll(item));
   if (o.props) o.props(scene, r);
   if (o.exposure) r.lights.__exposure = o.exposure;
   const cam = new THREE.PerspectiveCamera(o.fov ?? 30, o.w / o.h, 0.1, 80);

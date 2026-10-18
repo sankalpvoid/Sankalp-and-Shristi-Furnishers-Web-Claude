@@ -135,3 +135,47 @@ export async function renderScene(spec) {
   renderer.dispose();
   return c2.toDataURL("image/png");
 }
+
+/**
+ * Matte pass: renders only the hero object (the group flagged `userData.isItem`) as flat white on black, with the
+ * exact same camera as the beauty render, so a drawing traced from it registers pixel-for-pixel with the image.
+ */
+export async function renderMatte(spec, only = "item") {
+  const { width, height, build } = spec;
+  const canvas = document.createElement("canvas");
+  canvas.width = width; canvas.height = height;
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(1);
+  renderer.setSize(width, height, false);
+  renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+  renderer.toneMapping = THREE.NoToneMapping;
+  const { scene, camera } = build(THREE);
+  const item = scene.children.find((c) => c.userData && c.userData.isItem);
+  if (!item) throw new Error("no item flagged for matte");
+  scene.children.forEach((c) => { c.visible = c === item; });
+  // only = "slat": just the headboard slats (flagged in kit.js), so each slat traces as its own contour
+  if (only === "slat") item.children.forEach((c) => { c.visible = !!(c.userData && c.userData.slat); });
+  const white = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  if (only === "ids") {
+    // occlusion-correct part ID pass: flat colours, no antialiasing (decoded per channel on the way out)
+    const col = { frame: 0xff0000, bedding: 0x00ff00, throw: 0x0000ff, pillow: 0xffff00, head: 0xff00ff };
+    item.children.forEach((c) => {
+      const hex = c.userData.slat ? 0x00ffff : col[c.userData.part] ?? 0xffffff;
+      const mat = new THREE.MeshBasicMaterial({ color: hex });
+      c.traverse((m) => { if (m.isMesh) m.material = mat; });
+    });
+    renderer.dispose();
+    const c2 = document.createElement("canvas"); c2.width = width; c2.height = height;
+    const r2 = new THREE.WebGLRenderer({ canvas: c2, antialias: false, preserveDrawingBuffer: true });
+    r2.setPixelRatio(1); r2.setSize(width, height, false); r2.outputColorSpace = THREE.LinearSRGBColorSpace; r2.toneMapping = THREE.NoToneMapping;
+    scene.background = new THREE.Color(0x000000); r2.setClearColor(0x000000, 1); r2.render(scene, camera);
+    const u = c2.toDataURL("image/png"); r2.dispose(); return u;
+  }
+  item.traverse((m) => { if (m.isMesh) m.material = white; });
+  scene.background = new THREE.Color(0x000000);
+  renderer.setClearColor(0x000000, 1);
+  renderer.render(scene, camera);
+  const url = canvas.toDataURL("image/png");
+  renderer.dispose();
+  return url;
+}
